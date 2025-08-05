@@ -59,8 +59,8 @@ h1, h2, h3, h4, h5, h6 {
 /* Header - Clean and Simple */
 .main-header {
     background-color: var(--pantone-135);
-    padding: var(--spacing-sm) 0;
-    border-bottom: 2px solid var(--slate-gray);
+    padding: var(--spacing-xs) 0;
+    position: relative;
 }
 
 .header-container {
@@ -71,6 +71,7 @@ h1, h2, h3, h4, h5, h6 {
     justify-content: center;
     align-items: center;
     position: relative;
+    min-height: 200px;
 }
 
 .logo-section {
@@ -96,6 +97,7 @@ h1, h2, h3, h4, h5, h6 {
     gap: var(--spacing-sm);
     align-items: center;
     position: absolute;
+    top: var(--spacing-xs);
     right: var(--spacing-md);
 }
 
@@ -129,8 +131,9 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Hero Section */
 .hero-section {
-    padding: var(--spacing-xl) 0;
+    padding: var(--spacing-sm) 0 var(--spacing-xl) 0;
     background-color: var(--pantone-135);
+    margin-top: -100px;
 }
 
 .hero-container {
