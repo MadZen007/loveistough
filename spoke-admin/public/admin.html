@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - LoveIsTough</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="admin.css">
+</head>
+<body>
+    <header class="sticky-header">
+        <div class="header-content">
+            <a href="../../index.html" class="back-button">← Back</a>
+            <h1 class="site-title">Admin Dashboard</h1>
+            <nav class="main-nav">
+                <a href="../../index.html" class="nav-link">Home</a>
+                <a href="../spoke-articles/public/articles.html" class="nav-link">Articles</a>
+                <a href="../spoke-advice/public/advice.html" class="nav-link">Advice</a>
+                <a href="../spoke-community/public/community.html" class="nav-link">Community</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="admin-hero">
+            <div class="hero-content">
+                <h2 class="hero-title">Admin Dashboard</h2>
+                <p class="hero-subtitle">Manage your LoveIsTough platform</p>
+            </div>
+        </section>
+
+        <section class="admin-section">
+            <div class="admin-grid">
+                <div class="admin-card">
+                    <div class="card-icon">📊</div>
+                    <h3>Site Statistics</h3>
+                    <div class="stats-grid" id="statsGrid">
+                        <!-- Stats will be loaded here -->
+                    </div>
+                </div>
+
+                <div class="admin-card">
+                    <div class="card-icon">🗄️</div>
+                    <h3>Database Setup</h3>
+                    <p>Initialize the database tables for the platform</p>
+                    <button class="btn btn-primary" id="setupDbBtn">Setup Database</button>
+                </div>
+
+                <div class="admin-card">
+                    <div class="card-icon">👥</div>
+                    <h3>User Management</h3>
+                    <p>Manage user accounts and permissions</p>
+                    <button class="btn btn-secondary" id="manageUsersBtn">Manage Users</button>
+                </div>
+
+                <div class="admin-card">
+                    <div class="card-icon">📝</div>
+                    <h3>Content Management</h3>
+                    <p>Manage articles, advice posts, and community content</p>
+                    <button class="btn btn-secondary" id="manageContentBtn">Manage Content</button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>LoveIsTough</h3>
+                <p>Real advice for real relationships.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="../../index.html">Home</a></li>
+                                            <li><a href="../spoke-articles/public/articles.html">Articles</a></li>
+                        <li><a href="../spoke-advice/public/advice.html">Advice</a></li>
+                        <li><a href="../spoke-community/public/community.html">Community</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <div class="social-links">
+                    <a href="#" class="social-link">Twitter</a>
+                    <a href="#" class="social-link">Instagram</a>
+                    <a href="#" class="social-link">Facebook</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 LoveIsTough. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../../script.js"></script>
+    <script src="admin.js"></script>
+</body>
+</html> 

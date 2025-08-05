@@ -1,0 +1,195 @@
+/* Admin Page Specific Styles */
+.admin-hero {
+    background: linear-gradient(135deg, var(--light-tan) 0%, var(--dark-tan) 100%);
+    padding: var(--spacing-xl) var(--spacing-md);
+    text-align: center;
+    border-bottom: 3px solid var(--slate-gray);
+    margin-bottom: var(--spacing-lg);
+}
+
+.admin-hero .hero-title {
+    font-size: 3.5rem;
+    margin-bottom: var(--spacing-md);
+    text-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+}
+
+.admin-hero .hero-subtitle {
+    font-size: 1.4rem;
+    color: var(--slate-gray);
+    margin-bottom: var(--spacing-lg);
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+/* Admin Section */
+.admin-section {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.admin-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.admin-card {
+    background: linear-gradient(135deg, var(--light-tan) 0%, var(--dark-tan) 100%);
+    border: 2px solid var(--slate-gray);
+    border-radius: 15px;
+    padding: var(--spacing-md);
+    transition: var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+    text-align: center;
+}
+
+.admin-card:hover {
+    transform: translateY(-5px) scale(1.02);
+    border-color: var(--vibrant-red);
+    box-shadow: 0 15px 35px rgba(255, 0, 0, 0.3);
+}
+
+.admin-card .card-icon {
+    font-size: 3rem;
+    margin-bottom: var(--spacing-sm);
+    text-align: center;
+}
+
+.admin-card h3 {
+    font-size: 1.5rem;
+    margin-bottom: var(--spacing-sm);
+    color: var(--black);
+}
+
+.admin-card p {
+    color: var(--slate-gray);
+    margin-bottom: var(--spacing-md);
+    line-height: 1.6;
+}
+
+.admin-card .btn {
+    margin-top: var(--spacing-sm);
+}
+
+/* Stats Grid */
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-md);
+}
+
+.stat-item {
+    background-color: var(--white);
+    border: 2px solid var(--slate-gray);
+    border-radius: 10px;
+    padding: var(--spacing-sm);
+    text-align: center;
+    transition: var(--transition-normal);
+}
+
+.stat-item:hover {
+    border-color: var(--vibrant-red);
+    transform: scale(1.05);
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--vibrant-red);
+    display: block;
+    margin-bottom: var(--spacing-xs);
+}
+
+.stat-label {
+    font-size: 0.9rem;
+    color: var(--slate-gray);
+    font-weight: bold;
+    text-transform: uppercase;
+}
+
+/* Loading States */
+.loading-spinner {
+    text-align: center;
+    padding: var(--spacing-lg);
+    display: none;
+}
+
+.loading-spinner.visible {
+    display: block;
+}
+
+.loading-spinner p {
+    margin-top: var(--spacing-sm);
+    color: var(--slate-gray);
+    font-weight: bold;
+}
+
+/* Success/Error Messages */
+.message {
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: 8px;
+    margin-bottom: var(--spacing-md);
+    font-weight: bold;
+}
+
+.message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.message.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .admin-hero .hero-title {
+        font-size: 2.5rem;
+    }
+    
+    .admin-hero .hero-subtitle {
+        font-size: 1.2rem;
+    }
+    
+    .admin-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .stats-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 480px) {
+    .admin-hero .hero-title {
+        font-size: 2rem;
+    }
+    
+    .admin-card h3 {
+        font-size: 1.3rem;
+    }
+    
+    .stat-number {
+        font-size: 1.5rem;
+    }
+}
+
+@media (max-width: 700px) {
+    .admin-grid {
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+} 

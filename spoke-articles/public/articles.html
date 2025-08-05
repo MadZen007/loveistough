@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Articles - LoveIsTough</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="articles.css">
+</head>
+<body>
+    <header class="sticky-header">
+        <div class="header-content">
+            <a href="../../index.html" class="back-button">← Back</a>
+            <h1 class="site-title">Articles</h1>
+            <nav class="main-nav">
+                <a href="../../index.html" class="nav-link">Home</a>
+                <a href="../spoke-advice/public/advice.html" class="nav-link">Advice</a>
+                <a href="../spoke-community/public/community.html" class="nav-link">Community</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="articles-hero">
+            <div class="hero-content">
+                <h2 class="hero-title">Relationship Articles</h2>
+                <p class="hero-subtitle">Expert insights and practical advice for navigating love's challenges</p>
+                <div class="category-filters">
+                    <button class="filter-btn active" data-category="all">All</button>
+                    <button class="filter-btn" data-category="communication">Communication</button>
+                    <button class="filter-btn" data-category="trust">Trust</button>
+                    <button class="filter-btn" data-category="conflict">Conflict Resolution</button>
+                    <button class="filter-btn" data-category="intimacy">Intimacy</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="articles-section">
+            <div class="articles-grid" id="articlesGrid">
+                <!-- Articles will be loaded here dynamically -->
+            </div>
+            
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+                <p>Loading articles...</p>
+            </div>
+            
+            <div class="load-more-container">
+                <button class="btn btn-primary" id="loadMoreBtn">Load More Articles</button>
+            </div>
+        </section>
+
+        <section class="featured-article-section">
+            <h2 class="section-title">Featured Article</h2>
+            <article class="featured-article" id="featuredArticle">
+                <!-- Featured article will be loaded here -->
+            </article>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>LoveIsTough</h3>
+                <p>Real advice for real relationships.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="../../index.html">Home</a></li>
+                                            <li><a href="../spoke-advice/public/advice.html">Advice</a></li>
+                        <li><a href="../spoke-community/public/community.html">Community</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <div class="social-links">
+                    <a href="#" class="social-link">Twitter</a>
+                    <a href="#" class="social-link">Instagram</a>
+                    <a href="#" class="social-link">Facebook</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 LoveIsTough. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../../script.js"></script>
+    <script src="articles.js"></script>
+</body>
+</html> 

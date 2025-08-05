@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Community - LoveIsTough</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="community.css">
+</head>
+<body>
+    <header class="sticky-header">
+        <div class="header-content">
+            <a href="../../index.html" class="back-button">← Back</a>
+            <h1 class="site-title">Community</h1>
+            <nav class="main-nav">
+                <a href="../../index.html" class="nav-link">Home</a>
+                <a href="../spoke-articles/public/articles.html" class="nav-link">Articles</a>
+                <a href="../spoke-advice/public/advice.html" class="nav-link">Advice</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="community-hero">
+            <div class="hero-content">
+                <h2 class="hero-title">Join Our Community</h2>
+                <p class="hero-subtitle">Connect with others who understand the challenges of love and relationships</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" id="createPostBtn">Create Post</button>
+                    <button class="btn btn-secondary" id="browsePostsBtn">Browse Posts</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="community-section">
+            <div class="community-filters">
+                <div class="category-filters">
+                    <button class="filter-btn active" data-category="all">All Topics</button>
+                    <button class="filter-btn" data-category="discussion">Discussion</button>
+                    <button class="filter-btn" data-category="support">Support</button>
+                    <button class="filter-btn" data-category="celebration">Celebration</button>
+                    <button class="filter-btn" data-category="venting">Venting</button>
+                    <button class="filter-btn" data-category="questions">Questions</button>
+                </div>
+                <div class="sort-filters">
+                    <select id="sortSelect" class="sort-select">
+                        <option value="recent">Most Recent</option>
+                        <option value="popular">Most Popular</option>
+                        <option value="likes">Most Liked</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="community-grid" id="communityGrid">
+                <!-- Community posts will be loaded here dynamically -->
+            </div>
+            
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+                <p>Loading community posts...</p>
+            </div>
+            
+            <div class="load-more-container">
+                <button class="btn btn-primary" id="loadMoreBtn">Load More Posts</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Create Post Modal -->
+    <div class="modal-overlay" id="createPostModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeCreatePostModal()">&times;</button>
+            <h2 class="modal-title">Create a Community Post</h2>
+            <form id="createPostForm" class="community-form">
+                <div class="form-group">
+                    <label for="postTitle">Title</label>
+                    <input type="text" id="postTitle" name="title" required placeholder="What's on your mind?">
+                </div>
+                
+                <div class="form-group">
+                    <label for="postCategory">Category</label>
+                    <select id="postCategory" name="category" required>
+                        <option value="">Select a category</option>
+                        <option value="discussion">Discussion</option>
+                        <option value="support">Support</option>
+                        <option value="celebration">Celebration</option>
+                        <option value="venting">Venting</option>
+                        <option value="questions">Questions</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="postContent">Your Post</label>
+                    <textarea id="postContent" name="content" required placeholder="Share your thoughts, experiences, or questions..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label for="postTags">Tags (optional)</label>
+                    <input type="text" id="postTags" name="tags" placeholder="Enter tags separated by commas">
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeCreatePostModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Create Post</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>LoveIsTough</h3>
+                <p>Real advice for real relationships.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="../../index.html">Home</a></li>
+                                            <li><a href="../spoke-articles/public/articles.html">Articles</a></li>
+                        <li><a href="../spoke-advice/public/advice.html">Advice</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <div class="social-links">
+                    <a href="#" class="social-link">Twitter</a>
+                    <a href="#" class="social-link">Instagram</a>
+                    <a href="#" class="social-link">Facebook</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 LoveIsTough. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../../script.js"></script>
+    <script src="community.js"></script>
+</body>
+</html> 

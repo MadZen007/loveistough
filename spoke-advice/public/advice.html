@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advice - LoveIsTough</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../../styles.css">
+    <link rel="stylesheet" href="advice.css">
+</head>
+<body>
+    <header class="sticky-header">
+        <div class="header-content">
+            <a href="../../index.html" class="back-button">← Back</a>
+            <h1 class="site-title">Advice</h1>
+            <nav class="main-nav">
+                <a href="../../index.html" class="nav-link">Home</a>
+                <a href="../spoke-articles/public/articles.html" class="nav-link">Articles</a>
+                <a href="../spoke-community/public/community.html" class="nav-link">Community</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section class="advice-hero">
+            <div class="hero-content">
+                <h2 class="hero-title">Get Real Advice</h2>
+                <p class="hero-subtitle">Ask for advice or help others with their relationship challenges</p>
+                <div class="hero-buttons">
+                    <button class="btn btn-primary" id="askAdviceBtn">Ask for Advice</button>
+                    <button class="btn btn-secondary" id="browseAdviceBtn">Browse Advice</button>
+                </div>
+            </div>
+        </section>
+
+        <section class="advice-section">
+            <div class="advice-filters">
+                <div class="category-filters">
+                    <button class="filter-btn active" data-category="all">All Topics</button>
+                    <button class="filter-btn" data-category="communication">Communication</button>
+                    <button class="filter-btn" data-category="trust">Trust Issues</button>
+                    <button class="filter-btn" data-category="conflict">Conflict</button>
+                    <button class="filter-btn" data-category="intimacy">Intimacy</button>
+                    <button class="filter-btn" data-category="family">Family</button>
+                </div>
+                <div class="sort-filters">
+                    <select id="sortSelect" class="sort-select">
+                        <option value="recent">Most Recent</option>
+                        <option value="popular">Most Popular</option>
+                        <option value="responses">Most Responses</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="advice-grid" id="adviceGrid">
+                <!-- Advice posts will be loaded here dynamically -->
+            </div>
+            
+            <div class="loading-spinner" id="loadingSpinner">
+                <div class="spinner"></div>
+                <p>Loading advice posts...</p>
+            </div>
+            
+            <div class="load-more-container">
+                <button class="btn btn-primary" id="loadMoreBtn">Load More Posts</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Ask Advice Modal -->
+    <div class="modal-overlay" id="askAdviceModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAskAdviceModal()">&times;</button>
+            <h2 class="modal-title">Ask for Advice</h2>
+            <form id="askAdviceForm" class="advice-form">
+                <div class="form-group">
+                    <label for="adviceTitle">Title</label>
+                    <input type="text" id="adviceTitle" name="title" required placeholder="Brief description of your situation">
+                </div>
+                
+                <div class="form-group">
+                    <label for="adviceCategory">Category</label>
+                    <select id="adviceCategory" name="category" required>
+                        <option value="">Select a category</option>
+                        <option value="communication">Communication</option>
+                        <option value="trust">Trust Issues</option>
+                        <option value="conflict">Conflict</option>
+                        <option value="intimacy">Intimacy</option>
+                        <option value="family">Family</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="adviceContent">Your Situation</label>
+                    <textarea id="adviceContent" name="content" required placeholder="Describe your situation in detail..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label class="checkbox-label">
+                        <input type="checkbox" id="isAnonymous" name="isAnonymous">
+                        <span class="checkmark"></span>
+                        Post anonymously
+                    </label>
+                </div>
+                
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeAskAdviceModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Submit Question</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <footer class="site-footer">
+        <div class="footer-content">
+            <div class="footer-section">
+                <h3>LoveIsTough</h3>
+                <p>Real advice for real relationships.</p>
+            </div>
+            <div class="footer-section">
+                <h4>Quick Links</h4>
+                <ul>
+                    <li><a href="../../index.html">Home</a></li>
+                                            <li><a href="../spoke-articles/public/articles.html">Articles</a></li>
+                        <li><a href="../spoke-community/public/community.html">Community</a></li>
+                </ul>
+            </div>
+            <div class="footer-section">
+                <h4>Connect</h4>
+                <div class="social-links">
+                    <a href="#" class="social-link">Twitter</a>
+                    <a href="#" class="social-link">Instagram</a>
+                    <a href="#" class="social-link">Facebook</a>
+                </div>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            <p>&copy; 2024 LoveIsTough. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <script src="../../script.js"></script>
+    <script src="advice.js"></script>
+</body>
+</html> 

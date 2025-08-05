@@ -1,0 +1,39 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "api/**/*.js",
+      "use": "@vercel/node"
+    },
+    {
+      "src": "*.html",
+      "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    },
+    {
+      "src": "/spoke-articles/(.*)",
+      "dest": "/spoke-articles/$1"
+    },
+    {
+      "src": "/spoke-advice/(.*)",
+      "dest": "/spoke-advice/$1"
+    },
+    {
+      "src": "/spoke-community/(.*)",
+      "dest": "/spoke-community/$1"
+    },
+    {
+      "src": "/spoke-admin/(.*)",
+      "dest": "/spoke-admin/$1"
+    },
+    {
+      "src": "/(.*)",
+      "dest": "/$1"
+    }
+  ]
+} 
