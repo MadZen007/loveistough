@@ -81,7 +81,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .main-logo {
-    height: 240px;
+    height: 480px;
     width: auto;
     transition: var(--transition-normal);
 }
@@ -270,7 +270,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .hero-img {
-    max-width: 100%;
+    max-width: 50%;
     height: auto;
     border-radius: 15px;
     border: 3px solid var(--slate-gray);
