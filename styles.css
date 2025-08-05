@@ -131,9 +131,8 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Hero Section */
 .hero-section {
-    padding: var(--spacing-sm) 0 var(--spacing-xl) 0;
+    padding: var(--spacing-lg) 0 var(--spacing-xl) 0;
     background-color: var(--pantone-135);
-    margin-top: -50px;
 }
 
 .hero-container {
