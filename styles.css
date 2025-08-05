@@ -154,6 +154,69 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--slate-gray);
 }
 
+.hero-body {
+    font-size: 1.1rem;
+    margin-bottom: var(--spacing-lg);
+    color: var(--black);
+    line-height: 1.7;
+}
+
+.hero-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+    margin-bottom: var(--spacing-lg);
+}
+
+.hero-card {
+    background: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%);
+    border: 2px solid var(--slate-gray);
+    border-radius: 15px;
+    padding: var(--spacing-md);
+    transition: var(--transition-normal);
+    text-align: center;
+}
+
+.hero-card:hover {
+    transform: translateY(-5px) scale(1.05) translateX(5px);
+    border-color: var(--vibrant-red);
+    box-shadow: 0 15px 35px rgba(255, 0, 0, 0.3);
+}
+
+.hero-card h3 {
+    font-family: var(--font-header);
+    font-size: 1.4rem;
+    margin-bottom: var(--spacing-sm);
+    color: var(--black);
+}
+
+.hero-card p {
+    font-size: 0.95rem;
+    margin-bottom: var(--spacing-sm);
+    color: var(--slate-gray);
+}
+
+.hero-card-btn {
+    display: inline-block;
+    padding: var(--spacing-xs) var(--spacing-sm);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    text-decoration: none;
+    border-radius: 8px;
+    transition: var(--transition-normal);
+    cursor: pointer;
+    border: none;
+    background-color: var(--slate-gray);
+    color: var(--white);
+    box-shadow: 0 4px 15px rgba(112, 128, 144, 0.3);
+}
+
+.hero-card-btn:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 25px rgba(255, 0, 0, 0.4);
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+}
+
 .hero-buttons {
     display: flex;
     gap: var(--spacing-sm);
@@ -391,6 +454,11 @@ h1, h2, h3, h4, h5, h6 {
         font-size: 2.5rem;
     }
     
+    .hero-cards-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+    
     .main-logo {
         height: 60px;
     }
@@ -412,6 +480,11 @@ h1, h2, h3, h4, h5, h6 {
     .social-links {
         justify-content: center;
     }
+    
+    .hero-btn {
+        padding: var(--spacing-xs) var(--spacing-sm);
+        font-size: 1rem;
+    }
 }
 
 @media (max-width: 480px) {
@@ -423,8 +496,12 @@ h1, h2, h3, h4, h5, h6 {
         font-size: 2rem;
     }
     
-    .hero-btn {
+    .hero-card h3 {
+        font-size: 1.2rem;
+    }
+    
+    .hero-card-btn {
         padding: var(--spacing-xs) var(--spacing-sm);
-        font-size: 1rem;
+        font-size: 0.85rem;
     }
 } 
