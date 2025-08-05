@@ -71,7 +71,7 @@ h1, h2, h3, h4, h5, h6 {
     justify-content: center;
     align-items: center;
     position: relative;
-    min-height: 200px;
+    min-height: 100px;
 }
 
 .logo-section {
@@ -82,7 +82,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .main-logo {
-    height: 480px;
+    height: 120px;
     width: auto;
     transition: var(--transition-normal);
 }
@@ -133,7 +133,7 @@ h1, h2, h3, h4, h5, h6 {
 .hero-section {
     padding: var(--spacing-sm) 0 var(--spacing-xl) 0;
     background-color: var(--pantone-135);
-    margin-top: -100px;
+    margin-top: -50px;
 }
 
 .hero-container {
