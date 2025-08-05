@@ -68,17 +68,20 @@ h1, h2, h3, h4, h5, h6 {
     margin: 0 auto;
     padding: 0 var(--spacing-md);
     display: flex;
-    justify-content: space-between;
+    justify-content: center;
     align-items: center;
+    position: relative;
 }
 
 .logo-section {
     display: flex;
     align-items: center;
+    justify-content: center;
+    flex: 1;
 }
 
 .main-logo {
-    height: 80px;
+    height: 240px;
     width: auto;
     transition: var(--transition-normal);
 }
@@ -92,6 +95,8 @@ h1, h2, h3, h4, h5, h6 {
     display: flex;
     gap: var(--spacing-sm);
     align-items: center;
+    position: absolute;
+    right: var(--spacing-md);
 }
 
 .auth-link {
@@ -132,14 +137,15 @@ h1, h2, h3, h4, h5, h6 {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 var(--spacing-md);
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: var(--spacing-lg);
+    display: flex;
+    flex-direction: column;
     align-items: center;
+    gap: var(--spacing-lg);
 }
 
 .hero-content {
-    text-align: left;
+    text-align: center;
+    max-width: 800px;
 }
 
 .hero-title {
@@ -260,6 +266,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .hero-image {
     text-align: center;
+    margin-bottom: var(--spacing-md);
 }
 
 .hero-img {
