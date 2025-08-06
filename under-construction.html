@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Under Construction - LoveIsTough.com</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Bebas+Neue&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .construction-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: var(--spacing-xl);
+        }
+        
+        .construction-image {
+            max-width: 80%;
+            max-height: 60vh;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            margin-bottom: var(--spacing-xl);
+        }
+        
+        .construction-title {
+            font-family: var(--font-heading);
+            font-size: 3rem;
+            color: var(--black);
+            margin-bottom: var(--spacing-md);
+        }
+        
+        .construction-text {
+            font-family: var(--font-body);
+            font-size: 1.2rem;
+            color: var(--black);
+            margin-bottom: var(--spacing-xl);
+            max-width: 600px;
+        }
+        
+        .return-btn {
+            background: var(--slate-gray);
+            color: var(--white);
+            padding: var(--spacing-md) var(--spacing-lg);
+            border: none;
+            border-radius: 8px;
+            font-family: var(--font-body);
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: var(--transition-normal);
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .return-btn:hover {
+            background: var(--vibrant-red);
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+        }
+        
+        @media (max-width: 768px) {
+            .construction-title {
+                font-size: 2rem;
+            }
+            
+            .construction-text {
+                font-size: 1rem;
+            }
+            
+            .construction-image {
+                max-width: 95%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="construction-container">
+        <img src="images/LIT-under-construction.png" alt="Under Construction - LoveIsTough" class="construction-image">
+        <h1 class="construction-title">Under Construction</h1>
+        <p class="construction-text">We're working hard to bring you amazing content. This section is being built with love, science, and absolutely zero toxic positivity.</p>
+        <a href="index.html" class="return-btn">Return to Homepage</a>
+    </div>
+</body>
+</html> 
