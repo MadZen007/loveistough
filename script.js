@@ -466,22 +466,26 @@ function initMemeSystem() {
             }
             
             const randomMemeSrc = getRandomMeme();
-            memeImage.src = randomMemeSrc;
-            memeModal.classList.add('active');
-            document.body.style.overflow = 'hidden';
             
-            // Add loading state
-            memeImage.style.opacity = '0';
+            // Set up event handlers before setting src
             memeImage.onload = function() {
                 memeImage.style.opacity = '1';
                 retryCount = 0; // Reset retry count on success
             };
+            
             memeImage.onerror = function() {
                 retryCount++;
                 LoveIsTough.showNotification(`Failed to load meme (attempt ${retryCount}/${maxRetries}). Trying another one...`, 'warning');
                 // Try another meme if this one fails
                 setTimeout(showRandomMeme, 500);
             };
+            
+            // Now set the source and show modal
+            memeImage.style.opacity = '0';
+            memeImage.src = randomMemeSrc;
+            memeModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
         } catch (error) {
             console.error('Error showing meme:', error);
             LoveIsTough.showNotification('Error loading meme', 'error');
@@ -493,6 +497,8 @@ function initMemeSystem() {
         document.body.style.overflow = 'auto';
         // Reset image source to clear memory
         memeImage.src = '';
+        // Reset retry count when modal is closed
+        retryCount = 0;
     }
     
     // Event listeners
