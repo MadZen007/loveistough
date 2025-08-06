@@ -495,6 +495,9 @@ function initMemeSystem() {
     function closeMemeModal() {
         memeModal.classList.remove('active');
         document.body.style.overflow = 'auto';
+        // Remove event handlers to prevent triggering onerror when clearing src
+        memeImage.onload = null;
+        memeImage.onerror = null;
         // Reset image source to clear memory
         memeImage.src = '';
         // Reset retry count when modal is closed
