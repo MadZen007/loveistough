@@ -360,9 +360,11 @@ function initMemeSystem() {
         // Update this array with your actual meme filenames
         return [
             // Add your meme filenames here, for example:
-            // 'meme1.jpg',
-            // 'funny-meme.png',
-            // 'dating-meme.gif',
+            'meme1.jpg',
+            'meme2.png',
+            'meme3.gif',
+            'dating-meme.jpg',
+            'funny-meme.png',
             // etc.
         ];
     }
@@ -374,13 +376,11 @@ function initMemeSystem() {
         memeFiles = files;
         console.log(`Loaded ${memeFiles.length} meme files`);
         
-        // Enable the meme button if we have files
-        if (memeFiles.length > 0) {
-            memeButton.style.opacity = '1';
-            memeButton.style.pointerEvents = 'auto';
-        } else {
-            memeButton.style.opacity = '0.5';
-            memeButton.style.pointerEvents = 'none';
+        // Always enable the meme button for testing
+        memeButton.style.opacity = '1';
+        memeButton.style.pointerEvents = 'auto';
+        
+        if (memeFiles.length === 0) {
             console.log('No meme files found. Add files to the images folder and update the memeFiles array.');
         }
     });
