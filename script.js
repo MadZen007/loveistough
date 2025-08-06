@@ -393,10 +393,19 @@ function initMemeSystem() {
         return `images/${memeFiles[randomIndex]}`;
     }
     
+    let retryCount = 0;
+    const maxRetries = 3;
+    
     function showRandomMeme() {
         try {
             if (memeFiles.length === 0) {
-                LoveIsTough.showNotification('No memes available yet!', 'info');
+                LoveIsTough.showNotification('No memes available yet! Add some meme files to the images folder.', 'info');
+                return;
+            }
+            
+            if (retryCount >= maxRetries) {
+                LoveIsTough.showNotification('Unable to load memes. Please check that meme files exist in the images folder.', 'error');
+                retryCount = 0;
                 return;
             }
             
@@ -409,9 +418,11 @@ function initMemeSystem() {
             memeImage.style.opacity = '0';
             memeImage.onload = function() {
                 memeImage.style.opacity = '1';
+                retryCount = 0; // Reset retry count on success
             };
             memeImage.onerror = function() {
-                LoveIsTough.showNotification('Failed to load meme. Trying another one...', 'warning');
+                retryCount++;
+                LoveIsTough.showNotification(`Failed to load meme (attempt ${retryCount}/${maxRetries}). Trying another one...`, 'warning');
                 // Try another meme if this one fails
                 setTimeout(showRandomMeme, 500);
             };
