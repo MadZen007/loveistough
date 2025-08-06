@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initScrollEffects();
     initNavigation();
     initLoadingStates();
+    initMemeSystem(); // Initialize the new meme system
 });
 
 // Animation System
@@ -326,6 +327,125 @@ const LoveIsTough = {
 
 // Make LoveIsTough available globally
 window.LoveIsTough = LoveIsTough;
+
+// Meme System
+function initMemeSystem() {
+    const memeButton = document.getElementById('memeButton');
+    const memeModal = document.getElementById('memeModal');
+    const memeClose = document.getElementById('memeClose');
+    const memeImage = document.getElementById('memeImage');
+    
+    // Supported meme file extensions
+    const supportedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
+    
+    // Function to get all meme files from the images folder
+    async function loadMemeFiles() {
+        try {
+            // Try to fetch a list of files from the images directory
+            // This is a fallback approach - you can also manually specify files
+            const response = await fetch('/api/memes');
+            if (response.ok) {
+                const files = await response.json();
+                return files.filter(file => 
+                    supportedExtensions.some(ext => 
+                        file.toLowerCase().endsWith(ext)
+                    )
+                );
+            }
+        } catch (error) {
+            console.log('Could not fetch meme list from API, using fallback');
+        }
+        
+        // Fallback: manually specify your meme files here
+        // Update this array with your actual meme filenames
+        return [
+            // Add your meme filenames here, for example:
+            // 'meme1.jpg',
+            // 'funny-meme.png',
+            // 'dating-meme.gif',
+            // etc.
+        ];
+    }
+    
+    let memeFiles = [];
+    
+    // Initialize meme files
+    loadMemeFiles().then(files => {
+        memeFiles = files;
+        console.log(`Loaded ${memeFiles.length} meme files`);
+        
+        // Enable the meme button if we have files
+        if (memeFiles.length > 0) {
+            memeButton.style.opacity = '1';
+            memeButton.style.pointerEvents = 'auto';
+        } else {
+            memeButton.style.opacity = '0.5';
+            memeButton.style.pointerEvents = 'none';
+            console.log('No meme files found. Add files to the images folder and update the memeFiles array.');
+        }
+    });
+    
+    function getRandomMeme() {
+        if (memeFiles.length === 0) {
+            throw new Error('No meme files available');
+        }
+        const randomIndex = Math.floor(Math.random() * memeFiles.length);
+        return `images/${memeFiles[randomIndex]}`;
+    }
+    
+    function showRandomMeme() {
+        try {
+            if (memeFiles.length === 0) {
+                LoveIsTough.showNotification('No memes available yet!', 'info');
+                return;
+            }
+            
+            const randomMemeSrc = getRandomMeme();
+            memeImage.src = randomMemeSrc;
+            memeModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+            
+            // Add loading state
+            memeImage.style.opacity = '0';
+            memeImage.onload = function() {
+                memeImage.style.opacity = '1';
+            };
+            memeImage.onerror = function() {
+                LoveIsTough.showNotification('Failed to load meme. Trying another one...', 'warning');
+                // Try another meme if this one fails
+                setTimeout(showRandomMeme, 500);
+            };
+        } catch (error) {
+            console.error('Error showing meme:', error);
+            LoveIsTough.showNotification('Error loading meme', 'error');
+        }
+    }
+    
+    function closeMemeModal() {
+        memeModal.classList.remove('active');
+        document.body.style.overflow = 'auto';
+        // Reset image source to clear memory
+        memeImage.src = '';
+    }
+    
+    // Event listeners
+    memeButton.addEventListener('click', showRandomMeme);
+    memeClose.addEventListener('click', closeMemeModal);
+    
+    // Close modal when clicking outside
+    memeModal.addEventListener('click', function(e) {
+        if (e.target === memeModal) {
+            closeMemeModal();
+        }
+    });
+    
+    // Close modal with Escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && memeModal.classList.contains('active')) {
+            closeMemeModal();
+        }
+    });
+}
 
 // Error handling
 window.addEventListener('error', function(e) {
