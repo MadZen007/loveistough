@@ -517,3 +517,29 @@ h1, h2, h3, h4, h5, h6 {
     border-radius: 10px;
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 } 
+
+/* Dark header for spoke pages */
+.sticky-header {
+    background-color: var(--black);
+}
+
+.sticky-header .header-content {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: var(--spacing-sm) var(--spacing-md);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.sticky-header .site-title,
+.sticky-header .nav-link,
+.sticky-header .back-button {
+    color: var(--slate-gray);
+}
+
+.sticky-header .nav-link:hover,
+.sticky-header .back-button:hover {
+    color: var(--vibrant-red);
+    text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
+} 
