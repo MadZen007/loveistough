@@ -543,3 +543,14 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--vibrant-red);
     text-shadow: 0 0 10px rgba(255, 0, 0, 0.5);
 } 
+
+/* Force header to black across the site */
+.main-header,
+header.main-header {
+    background-color: #000 !important;
+}
+
+.main-header .header-container,
+.main-header .logo-section {
+    background-color: transparent !important;
+} 
