@@ -194,9 +194,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .hero-card h3 {
     font-family: var(--font-header);
-    font-size: 1.4rem;
+    font-size: 1.8rem;
     margin-bottom: var(--spacing-sm);
-    color: var(--slate-gray);
+    color: var(--white);
 }
 
 .hero-card p {
@@ -399,7 +399,7 @@ h1, h2, h3, h4, h5, h6 {
     }
     
     .hero-card h3 {
-        font-size: 1.2rem;
+        font-size: 1.4rem;
     }
     
     .hero-card-btn {
