@@ -31,9 +31,9 @@
 }
 
 html, body {
-    background-color: var(--pantone-135);
+    background-color: var(--black);
     font-family: var(--font-body);
-    color: var(--black);
+    color: var(--slate-gray);
     line-height: 1.6;
     overflow-x: hidden;
 }
@@ -58,7 +58,7 @@ h1, h2, h3, h4, h5, h6 {
 
 /* Header - Clean and Simple */
 .main-header {
-    background-color: var(--pantone-135);
+    background-color: var(--black);
     padding: var(--spacing-xs) 0;
     position: relative;
 }
@@ -104,7 +104,7 @@ h1, h2, h3, h4, h5, h6 {
 .auth-link {
     font-family: var(--font-body);
     text-decoration: none;
-    color: var(--black);
+    color: var(--slate-gray);
     font-size: 1rem;
     padding: var(--spacing-xs) var(--spacing-sm);
     border-radius: 5px;
@@ -132,7 +132,7 @@ h1, h2, h3, h4, h5, h6 {
 /* Hero Section */
 .hero-section {
     padding: var(--spacing-lg) 0 var(--spacing-xl) 0;
-    background-color: var(--pantone-135);
+    background-color: var(--black);
 }
 
 .hero-container {
@@ -154,6 +154,7 @@ h1, h2, h3, h4, h5, h6 {
     font-size: 4rem;
     margin-bottom: var(--spacing-md);
     text-shadow: 0 0 20px rgba(255, 0, 0, 0.3);
+    color: var(--slate-gray);
 }
 
 .hero-subtitle {
@@ -165,7 +166,7 @@ h1, h2, h3, h4, h5, h6 {
 .hero-body {
     font-size: 1.1rem;
     margin-bottom: var(--spacing-lg);
-    color: var(--black);
+    color: var(--slate-gray);
     line-height: 1.7;
 }
 
@@ -177,7 +178,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .hero-card {
-    background: linear-gradient(135deg, var(--white) 0%, var(--light-gray) 100%);
+    background: linear-gradient(135deg, #0a0a0a 0%, #151515 100%);
     border: 2px solid var(--slate-gray);
     border-radius: 15px;
     padding: var(--spacing-md);
@@ -195,7 +196,7 @@ h1, h2, h3, h4, h5, h6 {
     font-family: var(--font-header);
     font-size: 1.4rem;
     margin-bottom: var(--spacing-sm);
-    color: var(--black);
+    color: var(--slate-gray);
 }
 
 .hero-card p {
