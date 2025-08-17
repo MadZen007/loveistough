@@ -506,6 +506,54 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 } 
 
+/* Generic Modal (used for Login/Signup) */
+.modal-overlay {
+	position: fixed;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0, 0, 0, 0.85);
+	display: flex;
+	justify-content: center;
+	align-items: center;
+	z-index: 3000;
+	opacity: 0;
+	visibility: hidden;
+	transition: var(--transition-normal);
+}
+
+.modal-overlay.active {
+	opacity: 1;
+	visibility: visible;
+}
+
+.modal-content {
+	background-color: #111;
+	color: var(--slate-gray);
+	border: 2px solid var(--slate-gray);
+	border-radius: 12px;
+	padding: var(--spacing-md);
+	max-width: 420px;
+	width: 90%;
+	position: relative;
+}
+
+.auth-form label {
+	display: block;
+	margin: 0 0 var(--spacing-xs) 0;
+}
+
+.auth-form input {
+	width: 100%;
+	padding: 0.6rem 0.8rem;
+	margin-bottom: var(--spacing-sm);
+	border-radius: 8px;
+	border: 2px solid var(--slate-gray);
+	background: #0a0a0a;
+	color: var(--slate-gray);
+}
+
 /* Dark header for spoke pages */
 .sticky-header {
     background-color: var(--black);

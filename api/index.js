@@ -1,4 +1,4 @@
-const { 
+const {
     createTables, 
     createUser, 
     authenticateUser, 
@@ -16,10 +16,9 @@ const {
 
 // CORS middleware
 const cors = require('cors');
+// Loosen origins for production while we stabilize deployments
 const corsMiddleware = cors({
-    origin: process.env.NODE_ENV === 'production' 
-        ? ['https://loveistough.com', 'https://www.loveistough.com']
-        : ['http://localhost:3000', 'http://localhost:5000'],
+    origin: (origin, cb) => cb(null, true),
     credentials: true
 });
 
@@ -34,30 +33,50 @@ function authenticateRequest(req) {
     return verifyToken(token);
 }
 
-// Error response helper
+// Response helpers compatible with Node HTTP response
+function sendJson(res, statusCode, payload) {
+    try {
+        res.statusCode = statusCode;
+        res.setHeader('Content-Type', 'application/json');
+        res.end(JSON.stringify(payload));
+    } catch (_) {
+        // ensure a response is ended to avoid NO_RESPONSE_FROM_FUNCTION
+        try { res.end(); } catch { /* noop */ }
+    }
+}
+
 function sendErrorResponse(res, statusCode, message, details = null) {
-    res.status(statusCode).json({
+    sendJson(res, statusCode, {
         success: false,
-        error: {
-            message,
-            details,
-            statusCode
-        }
+        error: { message, details, statusCode }
     });
 }
 
-// Success response helper
 function sendSuccessResponse(res, data, message = 'Success') {
-    res.status(200).json({
-        success: true,
-        message,
-        data
+    sendJson(res, 200, { success: true, message, data });
+}
+
+// Utility: parse JSON body safely
+async function parseJsonBody(req) {
+    return await new Promise((resolve) => {
+        let raw = '';
+        req.on('data', (chunk) => { raw += chunk; });
+        req.on('end', () => {
+            if (!raw) return resolve({});
+            try { resolve(JSON.parse(raw)); } catch { resolve({}); }
+        });
+        req.on('error', () => resolve({}));
     });
 }
 
 module.exports = async (req, res) => {
     // Apply CORS
-    await new Promise((resolve) => corsMiddleware(req, res, resolve));
+    try {
+        await new Promise((resolve) => corsMiddleware(req, res, resolve));
+    } catch (e) {
+        // If CORS middleware throws, still ensure a response
+        return sendErrorResponse(res, 500, 'CORS error');
+    }
     
     // Handle preflight requests
     if (req.method === 'OPTIONS') {
@@ -66,11 +85,19 @@ module.exports = async (req, res) => {
     }
 
     try {
-        const { action, ...params } = req.body;
+        // Ensure body is parsed in dev and prod
+        const body = req.body && Object.keys(req.body).length ? req.body : await parseJsonBody(req);
+        const { action, ...params } = body || {};
         const { method } = req;
 
         // Route based on action parameter
         switch (action) {
+            case 'health':
+                if (method !== 'GET' && method !== 'POST') {
+                    return sendErrorResponse(res, 405, 'Method not allowed');
+                }
+                await handleHealth(res);
+                break;
             case 'setup-database':
                 if (method !== 'POST') {
                     return sendErrorResponse(res, 405, 'Method not allowed');
@@ -363,3 +390,26 @@ async function handleGetStats(res) {
         sendErrorResponse(res, 500, 'Failed to retrieve statistics', error.message);
     }
 } 
+
+// Health-check handler
+async function handleHealth(res) {
+    try {
+        const hasCrdb = Boolean(process.env.COCKROACHDB_CONNECTION_STRING);
+        const hasDb = Boolean(process.env.DATABASE_URL);
+        const { Pool } = require('pg');
+        const connectionString = process.env.COCKROACHDB_CONNECTION_STRING || process.env.DATABASE_URL;
+
+        if (!connectionString) {
+            return sendSuccessResponse(res, { ok: false, reason: 'NO_CONNECTION_STRING', hasCrdb, hasDb });
+        }
+
+        const poolLocal = new (require('pg').Pool)({
+            connectionString,
+            ssl: { rejectUnauthorized: false }
+        });
+        const result = await poolLocal.query('SELECT 1 AS one');
+        return sendSuccessResponse(res, { ok: true, hasCrdb, hasDb, result: result.rows });
+    } catch (error) {
+        return sendSuccessResponse(res, { ok: false, error: String(error && error.message ? error.message : error) });
+    }
+}

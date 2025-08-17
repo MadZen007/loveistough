@@ -6,46 +6,28 @@
       "use": "@vercel/node"
     },
     {
-      "src": "*.html",
+      "src": "index.html",
       "use": "@vercel/static"
     },
     {
-      "src": "*.css",
+      "src": "under-construction.html",
       "use": "@vercel/static"
     },
     {
-      "src": "*.js",
+      "src": "styles.css",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "script.js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "sw.js",
       "use": "@vercel/static"
     },
     {
       "src": "images/**/*",
       "use": "@vercel/static"
-    }
-  ],
-  "routes": [
-    {
-      "src": "/api/(.*)",
-      "dest": "/api/$1"
-    },
-    {
-      "src": "/spoke-articles/(.*)",
-      "dest": "/spoke-articles/$1"
-    },
-    {
-      "src": "/spoke-advice/(.*)",
-      "dest": "/spoke-advice/$1"
-    },
-    {
-      "src": "/spoke-community/(.*)",
-      "dest": "/spoke-community/$1"
-    },
-    {
-      "src": "/spoke-admin/(.*)",
-      "dest": "/spoke-admin/$1"
-    },
-    {
-      "src": "/(.*)",
-      "dest": "/$1"
     }
   ]
 } 

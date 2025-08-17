@@ -1,4 +1,4 @@
-# LoveIsTough - Relationship Advice & Community Platform
+# loveistough-hub - Relationship Advice & Community Platform
 
 A modern web platform for relationship advice, community support, and expert insights. Built with a hub-and-spoke architecture optimized for Vercel deployment.
 
@@ -11,7 +11,7 @@ A modern web platform for relationship advice, community support, and expert ins
 
 ### Directory Structure
 ```
-loveistough/
+loveistough-hub/
 ├── index.html                 # Main homepage (hub)
 ├── styles.css                 # Global design system
 ├── script.js                  # Main JavaScript utilities
@@ -143,7 +143,7 @@ loveistough/
 1. **Clone the repository**
    ```bash
    git clone <repository-url>
-   cd loveistough
+   cd loveistough-hub
    ```
 
 2. **Install dependencies**

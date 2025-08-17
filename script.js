@@ -7,6 +7,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initNavigation();
     initLoadingStates();
     initMemeSystem(); // Initialize the new meme system
+    initAuthUI();
 });
 
 // Animation System
@@ -86,6 +87,113 @@ window.closeModal = function() {
     document.body.style.overflow = 'auto';
 };
 
+// Auth Modal + Handlers
+function initAuthUI() {
+    const loginBtn = document.getElementById('loginBtn');
+    const signupBtn = document.getElementById('signupBtn');
+    if (!loginBtn || !signupBtn) return;
+
+    loginBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal(renderLoginForm());
+        attachLoginHandler();
+    });
+
+    signupBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        openModal(renderSignupForm());
+        attachSignupHandler();
+    });
+}
+
+function renderLoginForm() {
+    return `
+        <h2 style="margin-top:0">Log In</h2>
+        <form id="loginForm" class="auth-form">
+            <label>Email</label>
+            <input type="email" name="email" required />
+            <label>Password</label>
+            <input type="password" name="password" required />
+            <button type="submit" class="hero-card-btn" style="margin-top:1rem">Log In</button>
+        </form>
+    `;
+}
+
+function renderSignupForm() {
+    return `
+        <h2 style="margin-top:0">Sign Up</h2>
+        <form id="signupForm" class="auth-form">
+            <label>Name</label>
+            <input type="text" name="name" required />
+            <label>Email</label>
+            <input type="email" name="email" required />
+            <label>Password</label>
+            <input type="password" name="password" required />
+            <button type="submit" class="hero-card-btn" style="margin-top:1rem">Create Account</button>
+        </form>
+    `;
+}
+
+function attachLoginHandler() {
+    const form = document.getElementById('loginForm');
+    if (!form) return;
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(form));
+        try {
+            showLoading();
+            const res = await LoveIsTough.apiCall('', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'login', email: data.email, password: data.password })
+            });
+            // Store JWT token under the key used elsewhere in the codebase
+            if (res && res.data && res.data.token) {
+                LoveIsTough.storage.set('token', res.data.token);
+            }
+            LoveIsTough.showNotification('Logged in successfully!', 'success');
+            closeModal();
+        } catch (err) {
+            LoveIsTough.showNotification('Login failed. Check your credentials.', 'error');
+        } finally {
+            hideLoading();
+        }
+    });
+}
+
+function attachSignupHandler() {
+    const form = document.getElementById('signupForm');
+    if (!form) return;
+    form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const data = Object.fromEntries(new FormData(form));
+        try {
+            showLoading();
+            const res = await LoveIsTough.apiCall('', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'register', username: data.name, email: data.email, password: data.password })
+            });
+            // Auto-login to get JWT
+            try {
+                const loginRes = await LoveIsTough.apiCall('', {
+                    method: 'POST',
+                    body: JSON.stringify({ action: 'login', email: data.email, password: data.password })
+                });
+                if (loginRes && loginRes.data && loginRes.data.token) {
+                    LoveIsTough.storage.set('token', loginRes.data.token);
+                }
+                LoveIsTough.showNotification('Account created! You are now signed in.', 'success');
+                closeModal();
+            } catch (e) {
+                LoveIsTough.showNotification('Account created. Please log in.', 'info');
+            }
+        } catch (err) {
+            LoveIsTough.showNotification('Signup failed. Email may already be registered.', 'error');
+        } finally {
+            hideLoading();
+        }
+    });
+}
+
 // Scroll Effects
 function initScrollEffects() {
     let ticking = false;
@@ -120,9 +228,14 @@ function initNavigation() {
     // Smooth scrolling for anchor links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
-            e.preventDefault();
-            const target = document.querySelector(this.getAttribute('href'));
+            const href = this.getAttribute('href');
+            // Ignore bare "#" links (e.g., Login/Signup buttons)
+            if (!href || href.trim() === '#') {
+                return;
+            }
+            const target = document.querySelector(href);
             if (target) {
+                e.preventDefault();
                 target.scrollIntoView({
                     behavior: 'smooth',
                     block: 'start'
