@@ -89,7 +89,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .main-logo:hover {
     transform: scale(1.05);
-    filter: drop-shadow(0 0 10px rgba(255, 0, 0, 0.3));
+    filter: drop-shadow(0 0 30px rgba(255, 0, 0, 0.8)) drop-shadow(0 0 60px rgba(255, 0, 0, 0.6)) drop-shadow(0 0 90px rgba(255, 0, 0, 0.5));
 }
 
 .auth-section {
@@ -283,7 +283,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .hero-img:hover {
     transform: scale(1.02);
-    box-shadow: 0 15px 40px rgba(255, 0, 0, 0.4);
+    box-shadow: 0 45px 120px rgba(255, 0, 0, 0.8), 0 0 80px rgba(255, 0, 0, 0.6), 0 0 40px rgba(255, 0, 0, 0.6);
 }
 
 /* Footer */
