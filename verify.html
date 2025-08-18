@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Verify Email - LoveIsTough</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script defer>
+        async function doVerify() {
+            const params = new URLSearchParams(location.search);
+            const token = params.get('token');
+            const res = await fetch('/api', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'verify-email', token })
+            });
+            const data = await res.json();
+            const el = document.getElementById('result');
+            el.textContent = data?.success ? 'Email verified! You can close this tab.' : 'Verification failed.';
+        }
+        document.addEventListener('DOMContentLoaded', doVerify);
+    </script>
+</head>
+<body>
+    <div style="max-width:600px;margin:80px auto;color:var(--slate-gray);text-align:center">
+        <h1 style="color:var(--white)">Verifying…</h1>
+        <p id="result"></p>
+    </div>
+</body>
+</html>
+
+

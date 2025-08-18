@@ -109,6 +109,19 @@ function buildResetEmailHtml(baseUrl, token) {
     `;
 }
 
+function buildVerifyEmailHtml(baseUrl, token) {
+    const url = `${baseUrl}/verify.html?token=${encodeURIComponent(token)}`;
+    return `
+      <div style="font-family:Arial,sans-serif;line-height:1.5">
+        <h2>Verify your email</h2>
+        <p>Thanks for joining LoveIsTough. Click to verify your email.</p>
+        <p><a href="${url}" style="display:inline-block;padding:10px 16px;background:#111;color:#fff;border-radius:6px;text-decoration:none">Verify Email</a></p>
+        <p>If the button doesn't work, copy and paste this URL into your browser:</p>
+        <p><a href="${url}">${url}</a></p>
+      </div>
+    `;
+}
+
 function sendErrorResponse(res, statusCode, message, details = null) {
     sendJson(res, statusCode, {
         success: false,
@@ -545,6 +558,18 @@ async function handleRequestEmailVerification(res) {
     try {
         const user = authenticateRequest(res.req);
         const created = await createEmailVerification(user.userId);
+        // Send verification email if configured
+        if (process.env.RESEND_API_KEY) {
+            try {
+                await sendEmailViaResend({
+                    to: user.email,
+                    subject: 'Verify your LoveIsTough email',
+                    html: buildVerifyEmailHtml(createPublicBaseUrl(res.req), created.token)
+                });
+            } catch (e) {
+                console.error('Verification email send failed:', e?.message || e);
+            }
+        }
         return sendSuccessResponse(res, { token: created.token, expiresAt: created.expiresAt }, 'Verification created');
     } catch (e) {
         return sendErrorResponse(res, 401, 'Authentication required');
