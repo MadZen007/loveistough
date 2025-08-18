@@ -71,6 +71,44 @@ function sendJson(res, statusCode, payload) {
     }
 }
 
+// Helpers for email
+function createPublicBaseUrl(req) {
+    const envBase = process.env.PUBLIC_BASE_URL;
+    if (envBase) return envBase.replace(/\/$/, '');
+    // Fallback: derive from host header
+    const host = req.headers.host;
+    const proto = 'https://';
+    return proto + host;
+}
+
+async function sendEmailViaResend({ to, subject, html }) {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) throw new Error('RESEND_API_KEY missing');
+    const fetch = (await import('node-fetch')).default;
+    const resp = await fetch('https://api.resend.com/emails', {
+        method: 'POST',
+        headers: {
+            'Authorization': `Bearer ${apiKey}`,
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ from: process.env.EMAIL_FROM || 'LoveIsTough <noreply@loveistough.com>', to, subject, html })
+    });
+    if (!resp.ok) throw new Error('Resend API error: ' + resp.status);
+}
+
+function buildResetEmailHtml(baseUrl, token) {
+    const url = `${baseUrl}/reset.html?token=${encodeURIComponent(token)}`;
+    return `
+      <div style="font-family:Arial,sans-serif;line-height:1.5">
+        <h2>Reset your password</h2>
+        <p>Click the button below to set a new password. This link expires in 30 minutes.</p>
+        <p><a href="${url}" style="display:inline-block;padding:10px 16px;background:#111;color:#fff;border-radius:6px;text-decoration:none">Reset Password</a></p>
+        <p>If the button doesn't work, copy and paste this URL into your browser:</p>
+        <p><a href="${url}">${url}</a></p>
+      </div>
+    `;
+}
+
 function sendErrorResponse(res, statusCode, message, details = null) {
     sendJson(res, statusCode, {
         success: false,
@@ -206,7 +244,7 @@ module.exports = async (req, res) => {
             case 'request-password-reset':
                 if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
                 if (!rateLimit(req, 'request-password-reset', 5)) return sendErrorResponse(res, 429, 'Too many requests');
-                await handleRequestPasswordReset(res, params);
+                await handleRequestPasswordReset(req, res, params);
                 break;
             case 'reset-password':
                 if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
@@ -214,7 +252,7 @@ module.exports = async (req, res) => {
                 break;
             case 'request-email-verification':
                 if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
-                await handleRequestEmailVerification(req, res);
+                await handleRequestEmailVerification(res);
                 break;
             case 'verify-email':
                 if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
@@ -465,13 +503,26 @@ async function handleHealth(res) {
 }
 
 // Request password reset
-async function handleRequestPasswordReset(res, params) {
+async function handleRequestPasswordReset(req, res, params) {
     const { email } = params || {};
     if (!email) return sendErrorResponse(res, 400, 'Email is required');
     try {
         const created = await createPasswordResetToken(email);
+        // Send email if configured via RESEND_API_KEY
+        if (created && process.env.RESEND_API_KEY) {
+            try {
+                await sendEmailViaResend({
+                    to: email,
+                    subject: 'Reset your LoveIsTough password',
+                    html: buildResetEmailHtml(createPublicBaseUrl(req), created.token)
+                });
+            } catch (e) {
+                // Log but do not fail the flow
+                console.error('Email send failed:', e?.message || e);
+            }
+        }
         // Do not reveal if user exists; return success regardless
-        return sendSuccessResponse(res, created ? { ok: true } : { ok: true }, 'If the email exists, a reset link has been created');
+        return sendSuccessResponse(res, { ok: true }, 'If the email exists, a reset link has been sent');
     } catch (e) {
         return sendErrorResponse(res, 500, 'Could not create reset request');
     }
@@ -490,9 +541,9 @@ async function handleResetPassword(res, params) {
 }
 
 // Request email verification (for logged-in users)
-async function handleRequestEmailVerification(req, res) {
+async function handleRequestEmailVerification(res) {
     try {
-        const user = authenticateRequest(req);
+        const user = authenticateRequest(res.req);
         const created = await createEmailVerification(user.userId);
         return sendSuccessResponse(res, { token: created.token, expiresAt: created.expiresAt }, 'Verification created');
     } catch (e) {
@@ -515,7 +566,7 @@ async function handleVerifyEmail(res, params) {
 // Export emails (admin only)
 async function handleExportEmails(req, res) {
     try {
-        const user = authenticateRequest(req);
+        const user = authenticateRequest(res.req);
         const adminEmail = process.env.ADMIN_EMAIL || '';
         if (!user || (!user.isAdmin && (!adminEmail || user.email !== adminEmail))) {
             return sendErrorResponse(res, 403, 'Admin required');

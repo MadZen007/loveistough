@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Reset Password - LoveIsTough</title>
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+        .reset-container { max-width: 420px; margin: 80px auto; padding: 24px; background: var(--black); border: 1px solid var(--slate-gray); border-radius: 8px; }
+        .reset-container h1 { color: var(--white); margin-top: 0; }
+        .reset-container label { display:block; margin: 12px 0 6px; color: var(--slate-gray); }
+        .reset-container input { width: 100%; padding: 10px; border-radius: 6px; border: 1px solid var(--slate-gray); background: #111; color: var(--white); }
+        .reset-container button { margin-top: 16px; padding: 10px 16px; border-radius: 6px; border: 1px solid var(--slate-gray); background: transparent; color: var(--white); cursor: pointer; }
+        .reset-container button:hover { box-shadow: 0 0 12px var(--vibrant-red); }
+        .note { color: var(--slate-gray); font-size: 14px; }
+    </style>
+    <script defer>
+        async function submitReset(event) {
+            event.preventDefault();
+            const params = new URLSearchParams(location.search);
+            const token = params.get('token');
+            const password = document.getElementById('newPwd').value;
+            if (!token) { alert('Missing token'); return; }
+            if (!password || password.length < 6) { alert('Password must be at least 6 characters'); return; }
+            const res = await fetch('/api', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'reset-password', token, newPassword: password })
+            });
+            const data = await res.json();
+            if (data?.success) {
+                alert('Password updated. Please log in.');
+                location.href = '/';
+            } else {
+                alert('Reset failed: ' + (data?.error?.message || data?.message || 'Unknown error'));
+            }
+        }
+    </script>
+</head>
+<body>
+    <div class="reset-container">
+        <h1>Reset Password</h1>
+        <p class="note">Enter a new password for your account.</p>
+        <form onsubmit="submitReset(event)">
+            <label for="newPwd">New Password</label>
+            <input id="newPwd" type="password" minlength="6" required />
+            <button type="submit">Update Password</button>
+        </form>
+    </div>
+</body>
+</html>
+
+

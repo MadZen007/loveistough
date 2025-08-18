@@ -100,6 +100,7 @@ function initAuthUI() {
             e.preventDefault();
             openModal(renderLoginForm());
             attachLoginHandler();
+            attachForgotPasswordHandler();
         });
     }
 
@@ -154,6 +155,7 @@ function renderLoginForm() {
             <label>Password</label>
             <input type="password" name="password" required />
             <button type="submit" class="hero-card-btn" style="margin-top:1rem">Log In</button>
+            <a href="#" id="forgotPwdLink" style="display:block;margin-top:0.75rem;color:var(--slate-gray);text-decoration:underline">Forgot password?</a>
         </form>
     `;
 }
@@ -194,6 +196,32 @@ function attachLoginHandler() {
             updateAuthButtons();
         } catch (err) {
             LoveIsTough.showNotification('Login failed. Check your credentials.', 'error');
+        } finally {
+            hideLoading();
+        }
+    });
+}
+
+function attachForgotPasswordHandler() {
+    const link = document.getElementById('forgotPwdLink');
+    if (!link) return;
+    link.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const emailInput = document.querySelector('#loginForm input[name="email"]');
+        const email = emailInput ? emailInput.value.trim() : '';
+        if (!email) {
+            LoveIsTough.showNotification('Enter your email in the form first.', 'warning');
+            return;
+        }
+        try {
+            showLoading();
+            const res = await LoveIsTough.apiCall('', {
+                method: 'POST',
+                body: JSON.stringify({ action: 'request-password-reset', email })
+            });
+            LoveIsTough.showNotification('If the email exists, a reset link has been sent.', 'info');
+        } catch (err) {
+            LoveIsTough.showNotification('Could not start password reset.', 'error');
         } finally {
             hideLoading();
         }
