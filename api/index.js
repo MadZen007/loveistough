@@ -84,7 +84,6 @@ function createPublicBaseUrl(req) {
 async function sendEmailViaResend({ to, subject, html }) {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) throw new Error('RESEND_API_KEY missing');
-    const fetch = (await import('node-fetch')).default;
     const resp = await fetch('https://api.resend.com/emails', {
         method: 'POST',
         headers: {
