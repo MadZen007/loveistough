@@ -1,6 +1,7 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
+const crypto = require('crypto');
 
 // Database connection
 const pool = new Pool({
@@ -26,6 +27,7 @@ async function createTables() {
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 is_admin BOOLEAN DEFAULT FALSE,
+                is_verified BOOLEAN DEFAULT FALSE,
                 avatar_url TEXT,
                 bio TEXT
             )
@@ -135,6 +137,30 @@ async function createTables() {
             )
         `);
 
+        // Password reset tokens
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS password_resets (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                token VARCHAR(128) UNIQUE NOT NULL,
+                expires_at TIMESTAMP NOT NULL,
+                used BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
+        // Email verification tokens
+        await client.query(`
+            CREATE TABLE IF NOT EXISTS email_verifications (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+                token VARCHAR(128) UNIQUE NOT NULL,
+                expires_at TIMESTAMP NOT NULL,
+                used BOOLEAN DEFAULT FALSE,
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+            )
+        `);
+
         console.log('All tables created successfully');
         return { success: true, message: 'Database tables created successfully' };
         
@@ -196,7 +222,8 @@ async function authenticateUser(email, password) {
                 id: user.id,
                 username: user.username,
                 email: user.email,
-                isAdmin: user.is_admin
+                isAdmin: user.is_admin,
+                isVerified: user.is_verified
             },
             token
         };
@@ -401,6 +428,58 @@ module.exports = {
     createUser,
     authenticateUser,
     verifyToken,
+    // Password reset helpers
+    async createPasswordResetToken(email) {
+        const userRes = await pool.query('SELECT id FROM users WHERE email = $1', [email]);
+        if (userRes.rows.length === 0) return null; // do not leak existence
+        const userId = userRes.rows[0].id;
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 1000 * 60 * 30); // 30 minutes
+        await pool.query(
+            'INSERT INTO password_resets (user_id, token, expires_at) VALUES ($1, $2, $3)',
+            [userId, token, expiresAt]
+        );
+        return { token, expiresAt };
+    },
+    async resetPasswordWithToken(token, newPassword) {
+        const resetRes = await pool.query(
+            'SELECT * FROM password_resets WHERE token = $1 AND used = FALSE',
+            [token]
+        );
+        if (resetRes.rows.length === 0) throw new Error('Invalid or used token');
+        const reset = resetRes.rows[0];
+        if (new Date(reset.expires_at) < new Date()) throw new Error('Token expired');
+        const passwordHash = await bcrypt.hash(newPassword, 12);
+        await pool.query('UPDATE users SET password_hash = $1, updated_at = NOW() WHERE id = $2', [passwordHash, reset.user_id]);
+        await pool.query('UPDATE password_resets SET used = TRUE WHERE id = $1', [reset.id]);
+        return true;
+    },
+    // Email verification helpers
+    async createEmailVerification(userId) {
+        const token = crypto.randomBytes(32).toString('hex');
+        const expiresAt = new Date(Date.now() + 1000 * 60 * 60 * 24); // 24 hours
+        await pool.query(
+            'INSERT INTO email_verifications (user_id, token, expires_at) VALUES ($1, $2, $3)',
+            [userId, token, expiresAt]
+        );
+        return { token, expiresAt };
+    },
+    async verifyEmailWithToken(token) {
+        const verRes = await pool.query(
+            'SELECT * FROM email_verifications WHERE token = $1 AND used = FALSE',
+            [token]
+        );
+        if (verRes.rows.length === 0) throw new Error('Invalid or used token');
+        const ver = verRes.rows[0];
+        if (new Date(ver.expires_at) < new Date()) throw new Error('Token expired');
+        await pool.query('UPDATE users SET is_verified = TRUE WHERE id = $1', [ver.user_id]);
+        await pool.query('UPDATE email_verifications SET used = TRUE WHERE id = $1', [ver.id]);
+        return true;
+    },
+    async exportAllUserEmails() {
+        const res = await pool.query('SELECT email, username, created_at, is_verified FROM users ORDER BY created_at DESC');
+        return res.rows;
+    },
     createArticle,
     getArticles,
     createAdvicePost,

@@ -11,16 +11,42 @@ const {
     getCommunityPosts,
     saveFileUpload,
     getSiteStats,
-    pool
+    pool,
+    createPasswordResetToken,
+    resetPasswordWithToken,
+    createEmailVerification,
+    verifyEmailWithToken,
+    exportAllUserEmails
 } = require('./dev-tools/setup');
 
 // CORS middleware
 const cors = require('cors');
-// Loosen origins for production while we stabilize deployments
+// Lock CORS to allowed origins (env ALLOWED_ORIGINS or sane defaults)
+const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://www.loveistough.com,https://loveistough.com').split(',').map(s => s.trim());
 const corsMiddleware = cors({
-    origin: (origin, cb) => cb(null, true),
+    origin: (origin, cb) => {
+        if (!origin) return cb(null, true); // allow same-origin or curl
+        const ok = allowedOrigins.includes(origin);
+        cb(null, ok);
+    },
     credentials: true
 });
+
+// Very light in-memory rate limiter per IP per action
+const rateMap = new Map(); // key: ip|action -> { count, resetAt }
+function rateLimit(req, action, limit = 10, windowMs = 10 * 60 * 1000) {
+    const ip = (req.headers['x-forwarded-for'] || req.connection.remoteAddress || 'ipless').toString();
+    const key = `${ip}|${action}`;
+    const now = Date.now();
+    const current = rateMap.get(key) || { count: 0, resetAt: now + windowMs };
+    if (now > current.resetAt) {
+        current.count = 0;
+        current.resetAt = now + windowMs;
+    }
+    current.count += 1;
+    rateMap.set(key, current);
+    return current.count <= limit;
+}
 
 // Authentication middleware
 function authenticateRequest(req) {
@@ -116,6 +142,7 @@ module.exports = async (req, res) => {
                 if (method !== 'POST') {
                     return sendErrorResponse(res, 405, 'Method not allowed');
                 }
+                if (!rateLimit(req, 'login')) return sendErrorResponse(res, 429, 'Too many attempts, try again later');
                 await handleUserLogin(res, params);
                 break;
 
@@ -173,6 +200,29 @@ module.exports = async (req, res) => {
                     return sendErrorResponse(res, 405, 'Method not allowed');
                 }
                 await handleGetStats(res);
+                break;
+
+            // Auth enhancements
+            case 'request-password-reset':
+                if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
+                if (!rateLimit(req, 'request-password-reset', 5)) return sendErrorResponse(res, 429, 'Too many requests');
+                await handleRequestPasswordReset(res, params);
+                break;
+            case 'reset-password':
+                if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
+                await handleResetPassword(res, params);
+                break;
+            case 'request-email-verification':
+                if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
+                await handleRequestEmailVerification(req, res);
+                break;
+            case 'verify-email':
+                if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
+                await handleVerifyEmail(res, params);
+                break;
+            case 'export-emails':
+                if (method !== 'GET' && method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
+                await handleExportEmails(req, res);
                 break;
 
             default:
@@ -411,5 +461,68 @@ async function handleHealth(res) {
         return sendSuccessResponse(res, { ok: true, hasCrdb, hasDb, result: result.rows });
     } catch (error) {
         return sendSuccessResponse(res, { ok: false, error: String(error && error.message ? error.message : error) });
+    }
+}
+
+// Request password reset
+async function handleRequestPasswordReset(res, params) {
+    const { email } = params || {};
+    if (!email) return sendErrorResponse(res, 400, 'Email is required');
+    try {
+        const created = await createPasswordResetToken(email);
+        // Do not reveal if user exists; return success regardless
+        return sendSuccessResponse(res, created ? { ok: true } : { ok: true }, 'If the email exists, a reset link has been created');
+    } catch (e) {
+        return sendErrorResponse(res, 500, 'Could not create reset request');
+    }
+}
+
+// Reset password
+async function handleResetPassword(res, params) {
+    const { token, newPassword } = params || {};
+    if (!token || !newPassword) return sendErrorResponse(res, 400, 'Token and newPassword are required');
+    try {
+        await resetPasswordWithToken(token, newPassword);
+        return sendSuccessResponse(res, { ok: true }, 'Password updated');
+    } catch (e) {
+        return sendErrorResponse(res, 400, e.message || 'Invalid token');
+    }
+}
+
+// Request email verification (for logged-in users)
+async function handleRequestEmailVerification(req, res) {
+    try {
+        const user = authenticateRequest(req);
+        const created = await createEmailVerification(user.userId);
+        return sendSuccessResponse(res, { token: created.token, expiresAt: created.expiresAt }, 'Verification created');
+    } catch (e) {
+        return sendErrorResponse(res, 401, 'Authentication required');
+    }
+}
+
+// Verify email
+async function handleVerifyEmail(res, params) {
+    const { token } = params || {};
+    if (!token) return sendErrorResponse(res, 400, 'Token is required');
+    try {
+        await verifyEmailWithToken(token);
+        return sendSuccessResponse(res, { ok: true }, 'Email verified');
+    } catch (e) {
+        return sendErrorResponse(res, 400, e.message || 'Invalid token');
+    }
+}
+
+// Export emails (admin only)
+async function handleExportEmails(req, res) {
+    try {
+        const user = authenticateRequest(req);
+        const adminEmail = process.env.ADMIN_EMAIL || '';
+        if (!user || (!user.isAdmin && (!adminEmail || user.email !== adminEmail))) {
+            return sendErrorResponse(res, 403, 'Admin required');
+        }
+        const rows = await exportAllUserEmails();
+        return sendSuccessResponse(res, { emails: rows }, 'Emails exported');
+    } catch (e) {
+        return sendErrorResponse(res, 401, 'Authentication required');
     }
 }
