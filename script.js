@@ -89,21 +89,60 @@ window.closeModal = function() {
 
 // Auth Modal + Handlers
 function initAuthUI() {
+    updateAuthButtons();
+    
     const loginBtn = document.getElementById('loginBtn');
     const signupBtn = document.getElementById('signupBtn');
-    if (!loginBtn || !signupBtn) return;
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    if (loginBtn) {
+        loginBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal(renderLoginForm());
+            attachLoginHandler();
+        });
+    }
 
-    loginBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        openModal(renderLoginForm());
-        attachLoginHandler();
-    });
+    if (signupBtn) {
+        signupBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            openModal(renderSignupForm());
+            attachSignupHandler();
+        });
+    }
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            logout();
+        });
+    }
+}
 
-    signupBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        openModal(renderSignupForm());
-        attachSignupHandler();
-    });
+function updateAuthButtons() {
+    const loginBtn = document.getElementById('loginBtn');
+    const signupBtn = document.getElementById('signupBtn');
+    const logoutBtn = document.getElementById('logoutBtn');
+    
+    const token = LoveIsTough.storage.get('token');
+    
+    if (token) {
+        // User is logged in - show logout, hide login/signup
+        if (loginBtn) loginBtn.style.display = 'none';
+        if (signupBtn) signupBtn.style.display = 'none';
+        if (logoutBtn) logoutBtn.style.display = 'inline-block';
+    } else {
+        // User is not logged in - show login/signup, hide logout
+        if (loginBtn) loginBtn.style.display = 'inline-block';
+        if (signupBtn) signupBtn.style.display = 'inline-block';
+        if (logoutBtn) logoutBtn.style.display = 'none';
+    }
+}
+
+function logout() {
+    LoveIsTough.storage.remove('token');
+    updateAuthButtons();
+    LoveIsTough.showNotification('Logged out successfully!', 'success');
 }
 
 function renderLoginForm() {
@@ -152,6 +191,7 @@ function attachLoginHandler() {
             }
             LoveIsTough.showNotification('Logged in successfully!', 'success');
             closeModal();
+            updateAuthButtons();
         } catch (err) {
             LoveIsTough.showNotification('Login failed. Check your credentials.', 'error');
         } finally {
@@ -183,6 +223,7 @@ function attachSignupHandler() {
                 }
                 LoveIsTough.showNotification('Account created! You are now signed in.', 'success');
                 closeModal();
+                updateAuthButtons();
             } catch (e) {
                 LoveIsTough.showNotification('Account created. Please log in.', 'info');
             }
