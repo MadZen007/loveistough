@@ -252,6 +252,13 @@ module.exports = async (req, res) => {
                 await handleGetStats(res);
                 break;
 
+            case 'list-memes':
+                if (method !== 'GET' && method !== 'POST') {
+                    return sendErrorResponse(res, 405, 'Method not allowed');
+                }
+                await handleListMemes(res);
+                break;
+
             // Auth enhancements
             case 'request-password-reset':
                 if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
@@ -511,6 +518,28 @@ async function handleHealth(res) {
         return sendSuccessResponse(res, { ok: true, hasCrdb, hasDb, result: result.rows });
     } catch (error) {
         return sendSuccessResponse(res, { ok: false, error: String(error && error.message ? error.message : error) });
+    }
+}
+
+// List meme filenames from images/memes
+async function handleListMemes(res) {
+    try {
+        const fs = require('fs');
+        const path = require('path');
+        const dir = path.join(process.cwd(), 'images', 'memes');
+        const supported = new Set(['.jpg', '.jpeg', '.png', '.gif', '.webp', '.JPG', '.PNG', '.WEBP']);
+        let files = [];
+        try {
+            files = fs.readdirSync(dir)
+                .filter((f) => supported.has(path.extname(f)))
+                .sort();
+        } catch (e) {
+            // If directory not found, return empty
+            files = [];
+        }
+        return sendSuccessResponse(res, { files }, 'Memes listed');
+    } catch (e) {
+        return sendErrorResponse(res, 500, 'Failed to list memes');
     }
 }
 

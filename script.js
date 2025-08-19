@@ -517,107 +517,43 @@ function initMemeSystem() {
     const memeClose = document.getElementById('memeClose');
     const memeImage = document.getElementById('memeImage');
     
-    // Supported meme file extensions
-    const supportedExtensions = ['.jpg', '.jpeg', '.png', '.gif', '.webp'];
-    
-    // Function to get all meme files from the images/memes folder
-    function loadMemeFiles() {
-        // Return the actual meme filenames from your images/memes folder
-        return [
-            'af1c6f1315931c961a6b9e4d0ceee31e.jpg',
-            '65dfa93311472d6f559f12c64f19e7f5.jpg',
-            'e3270d62bd1c6d93f12c76d58f878075.jpg',
-            'images (2).jpg',
-            '86211349.jpg',
-            'Benefits-Of-Dating-Me.jpg',
-            'relationship-memes-14-20250415.jpg',
-            'Best-Memes-About-Online-Dating-That-You-Will-Relate-To-50356-8.jpg',
-            'dating-memes-monfeat-20241028.jpg',
-            '5d17bb0c650914c64f13015971411202.jpg',
-            '3077e0847b2752520f93b3fb8510df63.jpg',
-            'eec2dcddacd0ad8b21452cc8e0368aca.jpg',
-            'images.png',
-            '17380193636570e68b758a8aefd3d9cce5f9af93b7682.webp',
-            'Screenshot_20240216-092152_Instagram.jpg',
-            '9e812177-0409-4ac9-9986-588076a996d1.jpg',
-            'Screenshot_20240226-072054_Instagram.jpg',
-            '9e7a2bef-3757-4447-97f0-00f5d02b8283.jpg',
-            '0ecf0742-2916-47f9-9948-764b0bb5f1c3.jpg',
-            'tumblr_nnruoaLQXC1tbzbhio1_1280.jpg',
-            '398c0124-815d-4fae-a37b-cf4daea839de.png',
-            '107802339_10220003525750309_5490957170942123902_n.jpg',
-            '0da1a35f-ff54-4d7d-a4af-7e4b4340cbc8.jpg',
-            'a278770c-2476-4247-8dad-c25ada6f8f87.jpg',
-            'Tumblr_l_456145562164014.jpg',
-            '3a83d612-8380-4876-9f4c-6dcc3dae5e28.jpg',
-            'tumblr_osuldkFkUD1vkzuj9o1_1280.jpg',
-            'Screenshot_20250410-193009.png',
-            'Screenshot_20250504-171433.png',
-            'Screenshot_20250505-223419.png',
-            'Screenshot_20250505-224424.png',
-            'Screenshot_20250505-224508.png',
-            'Screenshot_20250509-173543.png',
-            'Screenshot_20250513-092954.png',
-            'Screenshot_20250513-161119.png',
-            'Screenshot_20250516-124925.png',
-            'Screenshot_20250519-233137.png',
-            'Screenshot_20250522-173202.png',
-            'Screenshot_20250522-215838.png',
-            'Screenshot_20250527-203553.png',
-            'Screenshot_20250527-203637.png',
-            'Screenshot_20250527-205713~2.jpg',
-            'Screenshot_20250716-074200~2.jpg',
-            'man-do-thing-like-yea-one-large-pizza-delivery-please.jpg',
-            '2bc96ad132d6e2d6fe72f77db5b6c5ad.jpg',
-            '2a6839827410543ec3b3ba0262c277d9.jpg',
-            'aca90bd49ff0c9fd97059365d9f86840.jpg',
-            '9e97303407a58aa30549ffaaa3ad6843.jpg',
-            'd454b752ec89ccccfec2b224bd410813.jpg',
-            '635c385057f532a19be5009ca2ef9540.jpg',
-            'relationship-memes-29-9-23-2024.jpg',
-            'memes-love-dontgetserious-i-promise-you-this.jpg',
-            'titanic-fail-meme-bird-celine-dion.jpg',
-            'images (1).jpg',
-            'animal-not-relationship-but-having-relationship-problems-omarsel-van-oo.jpg',
-            'funny-relationship-memes-62bd66344a277__700.jpg',
-            'LTR2.jpg',
-            '6_105.webp',
-            '2e9555c8ffcb6826fd8012df1dda1764.jpg',
-            'images.jpg',
-            'dating-funny-memes-romantic-day-at-the-beach.png',
-            'download.jpg',
-            '79dcd1c529d98620f57dbf3e50a61683.jpg',
-            'better-half-v0-cncopitshlaf1.webp',
-            'she-is-the-keeper-v0-agy0091g13cf1.webp',
-            '9bae33dtvqff1.webp',
-            'still-love-me-dummy-and-all-v0-_G5IrknzVI8h3i_T-XPoBj-oq3NOMRa5YfbVH2Cd98w.webp',
-            'just-another-situationship-v0-I6MtLpREBVv80YMIGgXdhJEcy0Qxch0_CPM-7HxIjro.webp',
-            'all-i-got-is-love-for-you-v0-OUBsIms3eI3Ip0PM6Z9C7gknInaBStntz62c9qGRbVA.webp',
-            'grown-up-love-goals-v0-djs8j5y6gkdf1.webp',
-            'bend-over-t-rex-v0-vij3uy7jr5gf1.webp',
-            'mutual-weirdness-v0-tlt8ujbl3def1.webp',
-            'gomez-morticia-v0-1td77oh6mref1.webp',
-            'love-language-unhinged-compliments-v0-pbc87epajcgf1.webp',
-            'batman-goals-v0-xfhxrm72offf1.webp',
-            'thats-my-love-language-right-there-i-want-all-the-food-plus-v0-fttnorv4kgff1.webp',
-            'love-that-reassures-v0-6n0kkiezekgf1.webp',
-            '9vmhyz3g7uef1.webp',
-            'im-just-a-bit-tired-v0-n0ogp5rom8hf1.webp',
-            'both-is-better-v0-zchhpnclz6hf1.webp',
-            'not-clingy-at-all-v0-ts1hepyzf1df1.webp',
-            'predator-and-prey-v0-g4o92fsmd9ff1.webp',
-            'this-is-me-and-weve-been-together-31-yrs-v0-rny9x6lmkbgf1.webp',
-            'forget-what-v0-voiv1fi8lfdf1.webp',
-            'is-this-true-girls-v0-q3xbffgho5df1.webp',
-            'real-ones-know-this-feeling-v0-dxetwylni1cf1.webp'
-        ];
-    }
-    
     let memeFiles = [];
     
-    // Initialize meme files
-    memeFiles = loadMemeFiles();
-    console.log(`Loaded ${memeFiles.length} meme files`);
+    async function fetchMemeFiles() {
+        try {
+            const res = await fetch('/api', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'list-memes' })
+            });
+            const data = await res.json();
+            memeFiles = Array.isArray(data?.data?.files) ? data.data.files : [];
+        } catch (e) {
+            memeFiles = [];
+        }
+    }
+    
+    // Shuffle queue to minimize repeats
+    let shuffledQueue = [];
+    function reshuffleQueue() {
+        shuffledQueue = [...memeFiles];
+        for (let i = shuffledQueue.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [shuffledQueue[i], shuffledQueue[j]] = [shuffledQueue[j], shuffledQueue[i]];
+        }
+    }
+    function nextFromQueue() {
+        if (shuffledQueue.length === 0) reshuffleQueue();
+        return shuffledQueue.shift();
+    }
+    
+    // Initialize from API
+    fetchMemeFiles().then(() => {
+        reshuffleQueue();
+        console.log(`Loaded ${memeFiles.length} meme files`);
+        memeButton.style.opacity = '1';
+        memeButton.style.pointerEvents = 'auto';
+    });
     
     // Enable the meme button
     memeButton.style.opacity = '1';
@@ -627,8 +563,8 @@ function initMemeSystem() {
         if (memeFiles.length === 0) {
             throw new Error('No meme files available');
         }
-        const randomIndex = Math.floor(Math.random() * memeFiles.length);
-        return `images/memes/${memeFiles[randomIndex]}`;
+        const file = nextFromQueue();
+        return `images/memes/${file}`;
     }
     
     let retryCount = 0;
