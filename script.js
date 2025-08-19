@@ -658,25 +658,9 @@ function initSubscribeUI() {
     }
 
     async function refresh() {
-        try {
-            const status = await call('subscription-status');
-            if (status?.data?.subscription) {
-                const sub = status.data.subscription;
-                if (sub.cancelAtPeriodEnd) {
-                    btn.textContent = 'Reactivate Subscription';
-                    btn.dataset.mode = 'reactivate';
-                } else {
-                    btn.textContent = 'Cancel Subscription (end of period)';
-                    btn.dataset.mode = 'cancel';
-                }
-            } else {
-                btn.textContent = 'Support Us / Subscribe ($5/mo)';
-                btn.dataset.mode = 'create';
-            }
-        } catch (e) {
-            btn.textContent = 'Support Us / Subscribe';
-            btn.dataset.mode = 'create';
-        }
+        // Always present the same wording
+        btn.textContent = 'Support Us / Subscribe ($5/mo)';
+        btn.dataset.mode = 'create';
     }
 
     btn.addEventListener('click', async () => {
@@ -685,12 +669,6 @@ function initSubscribeUI() {
             if (mode === 'create') {
                 await call('subscription-create', { planId: 'basic' });
                 LoveIsTough.showNotification('Thanks for supporting!', 'success');
-            } else if (mode === 'cancel') {
-                await call('subscription-cancel');
-                LoveIsTough.showNotification('Will cancel at period end.', 'info');
-            } else if (mode === 'reactivate') {
-                await call('subscription-reactivate');
-                LoveIsTough.showNotification('Subscription reactivated.', 'success');
             }
         } catch (e) {
             LoveIsTough.showNotification('Sign in to manage subscription.', 'warning');

@@ -207,9 +207,9 @@ h1, h2, h3, h4, h5, h6 {
 
 .hero-card-btn {
     display: inline-block;
-    padding: var(--spacing-xs) var(--spacing-sm);
+    padding: calc(var(--spacing-xs) * 1.75) calc(var(--spacing-sm) * 1.75);
     font-family: var(--font-body);
-    font-size: 0.9rem;
+    font-size: 1.575rem;
     text-decoration: none;
     border-radius: 8px;
     transition: var(--transition-normal);
