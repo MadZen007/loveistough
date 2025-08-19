@@ -48,6 +48,18 @@ function rateLimit(req, action, limit = 10, windowMs = 10 * 60 * 1000) {
     return current.count <= limit;
 }
 
+// In-memory subscription store (demo). Replace with DB later.
+const subscriptions = new Map(); // key: userId -> subscription
+const subscriptionPlans = {
+    basic: {
+        id: 'basic',
+        name: 'Supporter',
+        price: 500,
+        interval: 'month',
+        features: ['No ads', 'Early access', 'Suggestions', 'Profile perks']
+    }
+};
+
 // Authentication middleware
 function authenticateRequest(req) {
     const authHeader = req.headers.authorization;
@@ -280,6 +292,28 @@ module.exports = async (req, res) => {
             case 'export-emails':
                 if (method !== 'GET' && method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
                 await handleExportEmails(req, res);
+                break;
+
+            // Subscription demo endpoints
+            case 'subscription-status':
+                if (method !== 'GET' && method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
+                await handleSubscriptionStatus(res);
+                break;
+            case 'subscription-create':
+                if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
+                await handleSubscriptionCreate(res, params);
+                break;
+            case 'subscription-cancel':
+                if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
+                await handleSubscriptionCancel(res);
+                break;
+            case 'subscription-reactivate':
+                if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
+                await handleSubscriptionReactivate(res);
+                break;
+            case 'subscription-plans':
+                if (method !== 'GET' && method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
+                await handleSubscriptionPlans(res);
                 break;
 
             default:
@@ -629,4 +663,76 @@ async function handleExportEmails(req, res) {
     } catch (e) {
         return sendErrorResponse(res, 401, 'Authentication required');
     }
+}
+
+// Helpers to get userId from Authorization (demo: token value)
+function requireUserId(req) {
+    const authHeader = req.headers.authorization || '';
+    if (!authHeader.startsWith('Bearer ')) throw new Error('Authentication required');
+    const token = authHeader.substring(7);
+    if (!token) throw new Error('Authentication required');
+    return token; // In production, decode JWT
+}
+
+async function handleSubscriptionStatus(res) {
+    try {
+        const userId = requireUserId(res.req);
+        const sub = subscriptions.get(userId) || null;
+        return sendSuccessResponse(res, { isSubscribed: !!sub && sub.status === 'active', subscription: sub }, 'Subscription status');
+    } catch (e) {
+        return sendErrorResponse(res, 401, 'Authentication required');
+    }
+}
+
+async function handleSubscriptionCreate(res, params) {
+    try {
+        const userId = requireUserId(res.req);
+        const planId = params?.planId || 'basic';
+        if (!subscriptionPlans[planId]) return sendErrorResponse(res, 400, 'Invalid plan');
+        const sub = {
+            id: `sub_${Date.now()}`,
+            userId,
+            planId,
+            status: 'active',
+            createdAt: new Date().toISOString(),
+            currentPeriodStart: new Date().toISOString(),
+            currentPeriodEnd: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
+            cancelAtPeriodEnd: false
+        };
+        subscriptions.set(userId, sub);
+        return sendSuccessResponse(res, { subscription: sub }, 'Subscription created');
+    } catch (e) {
+        return sendErrorResponse(res, 401, 'Authentication required');
+    }
+}
+
+async function handleSubscriptionCancel(res) {
+    try {
+        const userId = requireUserId(res.req);
+        const sub = subscriptions.get(userId);
+        if (!sub) return sendErrorResponse(res, 400, 'No active subscription found');
+        sub.cancelAtPeriodEnd = true;
+        subscriptions.set(userId, sub);
+        return sendSuccessResponse(res, { subscription: sub }, 'Will cancel at period end');
+    } catch (e) {
+        return sendErrorResponse(res, 401, 'Authentication required');
+    }
+}
+
+async function handleSubscriptionReactivate(res) {
+    try {
+        const userId = requireUserId(res.req);
+        const sub = subscriptions.get(userId);
+        if (!sub) return sendErrorResponse(res, 400, 'No subscription found');
+        sub.cancelAtPeriodEnd = false;
+        sub.status = 'active';
+        subscriptions.set(userId, sub);
+        return sendSuccessResponse(res, { subscription: sub }, 'Subscription reactivated');
+    } catch (e) {
+        return sendErrorResponse(res, 401, 'Authentication required');
+    }
+}
+
+async function handleSubscriptionPlans(res) {
+    return sendSuccessResponse(res, { plans: Object.values(subscriptionPlans) }, 'Plans');
 }

@@ -8,6 +8,7 @@ document.addEventListener('DOMContentLoaded', function() {
     initLoadingStates();
     initMemeSystem(); // Initialize the new meme system
     initAuthUI();
+    initSubscribeUI();
 });
 
 // Animation System
@@ -639,6 +640,66 @@ function initMemeSystem() {
             closeMemeModal();
         }
     });
+}
+
+// Subscribe / Support System (demo)
+function initSubscribeUI() {
+    const btn = document.getElementById('subscribeBtn');
+    if (!btn) return;
+
+    async function call(action, body = {}) {
+        const token = LoveIsTough.storage.get('token');
+        const res = await fetch('/api', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', Authorization: 'Bearer ' + (token || '') },
+            body: JSON.stringify({ action, ...body })
+        });
+        return res.json();
+    }
+
+    async function refresh() {
+        try {
+            const status = await call('subscription-status');
+            if (status?.data?.subscription) {
+                const sub = status.data.subscription;
+                if (sub.cancelAtPeriodEnd) {
+                    btn.textContent = 'Reactivate Subscription';
+                    btn.dataset.mode = 'reactivate';
+                } else {
+                    btn.textContent = 'Cancel Subscription (end of period)';
+                    btn.dataset.mode = 'cancel';
+                }
+            } else {
+                btn.textContent = 'Support Us / Subscribe ($5/mo)';
+                btn.dataset.mode = 'create';
+            }
+        } catch (e) {
+            btn.textContent = 'Support Us / Subscribe';
+            btn.dataset.mode = 'create';
+        }
+    }
+
+    btn.addEventListener('click', async () => {
+        const mode = btn.dataset.mode || 'create';
+        try {
+            if (mode === 'create') {
+                await call('subscription-create', { planId: 'basic' });
+                LoveIsTough.showNotification('Thanks for supporting!', 'success');
+            } else if (mode === 'cancel') {
+                await call('subscription-cancel');
+                LoveIsTough.showNotification('Will cancel at period end.', 'info');
+            } else if (mode === 'reactivate') {
+                await call('subscription-reactivate');
+                LoveIsTough.showNotification('Subscription reactivated.', 'success');
+            }
+        } catch (e) {
+            LoveIsTough.showNotification('Sign in to manage subscription.', 'warning');
+        } finally {
+            refresh();
+        }
+    });
+
+    refresh();
 }
 
 // Error handling
