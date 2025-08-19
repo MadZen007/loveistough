@@ -659,7 +659,7 @@ function initSubscribeUI() {
 
     async function refresh() {
         // Always present the same wording
-        btn.textContent = 'Support Us / Subscribe ($5/mo)';
+        btn.textContent = 'Support Us / Subscribe';
         btn.dataset.mode = 'create';
     }
 
