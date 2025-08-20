@@ -316,6 +316,16 @@ module.exports = async (req, res) => {
                 await handleSubscriptionPlans(res);
                 break;
 
+            // Go-link redirects (302) for spokes
+            case 'go-vent':
+                return handleGo(res, process.env.SPOKE_VENT_URL);
+            case 'go-advice':
+                return handleGo(res, process.env.SPOKE_ADVICE_URL);
+            case 'go-discover':
+                return handleGo(res, process.env.SPOKE_DISCOVER_URL);
+            case 'go-toolkit':
+                return handleGo(res, process.env.SPOKE_TOOLKIT_URL);
+
             default:
                 return sendErrorResponse(res, 400, 'Invalid action specified');
         }
@@ -735,4 +745,16 @@ async function handleSubscriptionReactivate(res) {
 
 async function handleSubscriptionPlans(res) {
     return sendSuccessResponse(res, { plans: Object.values(subscriptionPlans) }, 'Plans');
+}
+
+// Minimal 302 helper for go-links
+function handleGo(res, target) {
+    if (!target) return sendErrorResponse(res, 404, 'Destination not configured');
+    try {
+        res.statusCode = 302;
+        res.setHeader('Location', target);
+        res.end();
+    } catch (_) {
+        try { res.end(); } catch { /* noop */ }
+    }
 }
