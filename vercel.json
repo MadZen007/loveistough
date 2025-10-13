@@ -14,6 +14,18 @@
       "use": "@vercel/static"
     },
     {
+      "src": "about-me.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "verify.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "reset.html",
+      "use": "@vercel/static"
+    },
+    {
       "src": "styles.css",
       "use": "@vercel/static"
     },
