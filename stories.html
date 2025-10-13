@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Your Story - LoveIsTough.com</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+</head>
+<body>
+    <!-- Simple Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <img src="images/loveistough-logo-no-bg.png" alt="LoveIsTough Logo" class="main-logo">
+            </div>
+            <div class="auth-section">
+                <a href="index.html" class="auth-link">Back to Home</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">Share Your Story</h1>
+                <p class="hero-subtitle" style="font-family: 'Open Sans', sans-serif !important;">You're not alone in this crazy world of love and relationships. Share your story anonymously and let others know they're not the only ones going through it.</p>
+                
+                <!-- Back Button -->
+                <div class="back-button-container" style="margin-bottom: 2rem;">
+                    <a href="index.html" class="hero-card-btn">← Back to Home</a>
+                </div>
+
+                <!-- Submission Form -->
+                <div class="story-form-container" style="background: var(--color-card-bg); padding: 2rem; border-radius: var(--border-radius); margin-bottom: 3rem; border: 1px solid var(--color-accent);">
+                    <h2 style="color: var(--color-primary); margin-bottom: 1.5rem; font-family: var(--font-heading);">Share Your Story</h2>
+                    <form id="storyForm" style="font-family: 'Open Sans', sans-serif;">
+                        <div style="margin-bottom: 1.5rem;">
+                            <label for="storyTitle" style="display: block; margin-bottom: 0.5rem; color: var(--color-text); font-weight: 600;">Story Title (Optional)</label>
+                            <input type="text" id="storyTitle" name="title" placeholder="Give your story a title..." style="width: 100%; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: var(--border-radius); font-family: 'Open Sans', sans-serif; background: var(--color-bg); color: var(--color-text);">
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <label for="storyContent" style="display: block; margin-bottom: 0.5rem; color: var(--color-text); font-weight: 600;">Your Story *</label>
+                            <textarea id="storyContent" name="content" rows="8" placeholder="Tell us your story... What happened? How did it make you feel? What did you learn? Remember, this will be anonymous." required style="width: 100%; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: var(--border-radius); font-family: 'Open Sans', sans-serif; background: var(--color-bg); color: var(--color-text); resize: vertical;"></textarea>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem;">
+                            <label for="storyCategory" style="display: block; margin-bottom: 0.5rem; color: var(--color-text); font-weight: 600;">Category (Optional)</label>
+                            <select id="storyCategory" name="category" style="width: 100%; padding: 0.75rem; border: 1px solid var(--color-border); border-radius: var(--border-radius); font-family: 'Open Sans', sans-serif; background: var(--color-bg); color: var(--color-text);">
+                                <option value="">Choose a category...</option>
+                                <option value="dating-disaster">Dating Disaster</option>
+                                <option value="breakup">Breakup Story</option>
+                                <option value="relationship-struggle">Relationship Struggle</option>
+                                <option value="finding-love">Finding Love</option>
+                                <option value="family-drama">Family Drama</option>
+                                <option value="personal-growth">Personal Growth</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        
+                        <div style="margin-bottom: 1.5rem; padding: 1rem; background: rgba(255, 193, 7, 0.1); border-left: 4px solid #ffc107; border-radius: var(--border-radius);">
+                            <p style="margin: 0; color: var(--color-text); font-size: 0.9rem; font-family: 'Open Sans', sans-serif;">
+                                <strong>Privacy Note:</strong> Your submission will be completely anonymous. We will review all stories before publishing them to ensure they're appropriate and helpful to our community.
+                            </p>
+                        </div>
+                        
+                        <button type="submit" class="hero-card-btn" style="width: 100%; padding: 1rem; font-size: 1.1rem;">Share My Story</button>
+                    </form>
+                    
+                    <div id="submissionMessage" style="margin-top: 1rem; padding: 1rem; border-radius: var(--border-radius); display: none; font-family: 'Open Sans', sans-serif;"></div>
+                </div>
+
+                <!-- Stories Display Section -->
+                <div class="stories-display">
+                    <h2 style="color: var(--color-primary); margin-bottom: 2rem; font-family: var(--font-heading);">Community Stories</h2>
+                    
+                    <!-- Placeholder Stories -->
+                    <div class="stories-grid" style="display: grid; gap: 2rem; margin-bottom: 3rem;">
+                        <!-- Story 1 -->
+                        <div class="story-card" style="background: var(--color-card-bg); padding: 2rem; border-radius: var(--border-radius); border: 1px solid var(--color-border);">
+                            <h3 style="color: var(--color-accent); margin-bottom: 1rem; font-family: var(--font-heading);">The Tinder Catfish</h3>
+                            <p style="color: var(--color-text); margin-bottom: 1rem; font-family: 'Open Sans', sans-serif; line-height: 1.6;">
+                                [PLACEHOLDER: Story about meeting someone on Tinder who looked completely different in person, and how it led to a surprisingly great conversation about expectations vs reality in dating.]
+                            </p>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: var(--color-text-muted); font-family: 'Open Sans', sans-serif;">
+                                <span>Category: Dating Disaster</span>
+                                <span>Shared 2 days ago</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Story 2 -->
+                        <div class="story-card" style="background: var(--color-card-bg); padding: 2rem; border-radius: var(--border-radius); border: 1px solid var(--color-border);">
+                            <h3 style="color: var(--color-accent); margin-bottom: 1rem; font-family: var(--font-heading);">Learning to Love Myself First</h3>
+                            <p style="color: var(--color-text); margin-bottom: 1rem; font-family: 'Open Sans', sans-serif; line-height: 1.6;">
+                                [PLACEHOLDER: Personal journey of someone who realized they were jumping from relationship to relationship to avoid being alone, and how they learned to find happiness in solitude first.]
+                            </p>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: var(--color-text-muted); font-family: 'Open Sans', sans-serif;">
+                                <span>Category: Personal Growth</span>
+                                <span>Shared 1 week ago</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Story 3 -->
+                        <div class="story-card" style="background: var(--color-card-bg); padding: 2rem; border-radius: var(--border-radius); border: 1px solid var(--color-border);">
+                            <h3 style="color: var(--color-accent); margin-bottom: 1rem; font-family: var(--font-heading);">When Family Doesn't Approve</h3>
+                            <p style="color: var(--color-text); margin-bottom: 1rem; font-family: 'Open Sans', sans-serif; line-height: 1.6;">
+                                [PLACEHOLDER: Story about navigating a relationship when family members have strong opinions about your partner, and finding the balance between family loyalty and personal happiness.]
+                            </p>
+                            <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: var(--color-text-muted); font-family: 'Open Sans', sans-serif;">
+                                <span>Category: Family Drama</span>
+                                <span>Shared 3 days ago</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-logo">
+                <img src="images/loveistough-logo-no-bg.png" alt="LoveIsTough Logo" class="footer-logo-img">
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 LoveIsTough.com. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Meme Button -->
+    <div class="meme-button" id="memeButton">
+        <img src="images/L.I.T.-meme-button.png" alt="Random Meme" class="meme-icon">
+        <span class="meme-text">Random Meme</span>
+    </div>
+
+    <!-- Meme Modal -->
+    <div class="meme-modal" id="memeModal">
+        <div class="meme-modal-content">
+            <button class="meme-close" id="memeClose">&times;</button>
+            <div class="meme-container">
+                <img id="memeImage" src="" alt="Random Meme" class="meme-img">
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+    <script>
+        // Handle story submission
+        document.getElementById('storyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const storyData = {
+                title: formData.get('title') || 'Untitled Story',
+                content: formData.get('content'),
+                category: formData.get('category') || 'other',
+                timestamp: new Date().toISOString()
+            };
+            
+            if (!storyData.content.trim()) {
+                showMessage('Please write your story before submitting.', 'error');
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api/stories', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(storyData)
+                });
+                
+                if (response.ok) {
+                    showMessage('Thank you for sharing your story! It will be reviewed and may appear on this page soon.', 'success');
+                    this.reset();
+                } else {
+                    showMessage('There was an error submitting your story. Please try again.', 'error');
+                }
+            } catch (error) {
+                showMessage('There was an error submitting your story. Please try again.', 'error');
+            }
+        });
+        
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('submissionMessage');
+            messageDiv.textContent = message;
+            messageDiv.style.display = 'block';
+            messageDiv.style.backgroundColor = type === 'success' ? 'rgba(40, 167, 69, 0.1)' : 'rgba(220, 53, 69, 0.1)';
+            messageDiv.style.color = type === 'success' ? '#28a745' : '#dc3545';
+            messageDiv.style.borderLeft = `4px solid ${type === 'success' ? '#28a745' : '#dc3545'}`;
+            
+            setTimeout(() => {
+                messageDiv.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Load stories on page load
+        async function loadStories() {
+            try {
+                const response = await fetch('/api/stories');
+                if (response.ok) {
+                    const stories = await response.json();
+                    displayStories(stories);
+                }
+            } catch (error) {
+                console.log('Stories will be loaded from server');
+            }
+        }
+        
+        function displayStories(stories) {
+            const storiesGrid = document.querySelector('.stories-grid');
+            if (stories.length > 0) {
+                storiesGrid.innerHTML = stories.map(story => `
+                    <div class="story-card" style="background: var(--color-card-bg); padding: 2rem; border-radius: var(--border-radius); border: 1px solid var(--color-border);">
+                        <h3 style="color: var(--color-accent); margin-bottom: 1rem; font-family: var(--font-heading);">${story.title}</h3>
+                        <p style="color: var(--color-text); margin-bottom: 1rem; font-family: 'Open Sans', sans-serif; line-height: 1.6;">${story.content}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: var(--color-text-muted); font-family: 'Open Sans', sans-serif;">
+                            <span>Category: ${story.category.replace('-', ' ')}</span>
+                            <span>Shared ${formatDate(story.timestamp)}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 1) return 'yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+            return `${Math.ceil(diffDays / 30)} months ago`;
+        }
+        
+        // Load stories when page loads
+        document.addEventListener('DOMContentLoaded', loadStories);
+    </script>
+</body>
+</html>

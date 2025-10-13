@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel - LoveIsTough.com</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <style>
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+            font-family: 'Open Sans', sans-serif;
+        }
+        
+        .admin-header {
+            background: var(--color-card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 2rem;
+            border: 1px solid var(--color-border);
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+        
+        .stat-card {
+            background: var(--color-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--color-border);
+            text-align: center;
+        }
+        
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--color-accent);
+            font-family: var(--font-heading);
+        }
+        
+        .stat-label {
+            color: var(--color-text);
+            margin-top: 0.5rem;
+        }
+        
+        .submissions-section {
+            background: var(--color-card-bg);
+            padding: 2rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--color-border);
+        }
+        
+        .submission-item {
+            background: var(--color-bg);
+            padding: 1.5rem;
+            border-radius: var(--border-radius);
+            border: 1px solid var(--color-border);
+            margin-bottom: 1rem;
+            position: relative;
+        }
+        
+        .submission-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .submission-title {
+            color: var(--color-accent);
+            font-family: var(--font-heading);
+            font-size: 1.2rem;
+        }
+        
+        .submission-meta {
+            color: var(--color-text-muted);
+            font-size: 0.9rem;
+        }
+        
+        .submission-content {
+            color: var(--color-text);
+            line-height: 1.6;
+            margin-bottom: 1rem;
+        }
+        
+        .submission-actions {
+            display: flex;
+            gap: 1rem;
+        }
+        
+        .btn-approve {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-family: 'Open Sans', sans-serif;
+            transition: background 0.3s ease;
+        }
+        
+        .btn-approve:hover {
+            background: #218838;
+        }
+        
+        .btn-deny {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-family: 'Open Sans', sans-serif;
+            transition: background 0.3s ease;
+        }
+        
+        .btn-deny:hover {
+            background: #c82333;
+        }
+        
+        .submission-status {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .status-pending {
+            background: rgba(255, 193, 7, 0.2);
+            color: #856404;
+            border: 1px solid #ffc107;
+        }
+        
+        .status-approved {
+            background: rgba(40, 167, 69, 0.2);
+            color: #155724;
+            border: 1px solid #28a745;
+        }
+        
+        .status-denied {
+            background: rgba(220, 53, 69, 0.2);
+            color: #721c24;
+            border: 1px solid #dc3545;
+        }
+        
+        .filter-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+        
+        .filter-select {
+            padding: 0.5rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius);
+            background: var(--color-bg);
+            color: var(--color-text);
+            font-family: 'Open Sans', sans-serif;
+        }
+        
+        .no-submissions {
+            text-align: center;
+            color: var(--color-text-muted);
+            padding: 3rem;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <!-- Simple Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <img src="images/loveistough-logo-no-bg.png" alt="LoveIsTough Logo" class="main-logo">
+            </div>
+            <div class="auth-section">
+                <a href="index.html" class="auth-link">Back to Home</a>
+                <a href="stories.html" class="auth-link">View Stories</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Admin Content -->
+    <main class="admin-container">
+        <div class="admin-header">
+            <h1 style="color: var(--color-primary); margin-bottom: 1rem; font-family: var(--font-heading);">Admin Panel</h1>
+            <p style="color: var(--color-text); font-family: 'Open Sans', sans-serif;">Manage story submissions and view community statistics</p>
+        </div>
+
+        <!-- Statistics Section -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="totalStories">0</div>
+                <div class="stat-label">Total Stories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="pendingStories">0</div>
+                <div class="stat-label">Pending Review</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="approvedStories">0</div>
+                <div class="stat-label">Approved Stories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="deniedStories">0</div>
+                <div class="stat-label">Denied Stories</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="thisWeekStories">0</div>
+                <div class="stat-label">This Week</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="thisMonthStories">0</div>
+                <div class="stat-label">This Month</div>
+            </div>
+        </div>
+
+        <!-- Submissions Management -->
+        <div class="submissions-section">
+            <h2 style="color: var(--color-primary); margin-bottom: 1.5rem; font-family: var(--font-heading);">Story Submissions</h2>
+            
+            <div class="filter-controls">
+                <label for="statusFilter" style="color: var(--color-text); font-weight: 600;">Filter by Status:</label>
+                <select id="statusFilter" class="filter-select">
+                    <option value="all">All Submissions</option>
+                    <option value="pending">Pending Review</option>
+                    <option value="approved">Approved</option>
+                    <option value="denied">Denied</option>
+                </select>
+                
+                <label for="categoryFilter" style="color: var(--color-text); font-weight: 600;">Filter by Category:</label>
+                <select id="categoryFilter" class="filter-select">
+                    <option value="all">All Categories</option>
+                    <option value="dating-disaster">Dating Disaster</option>
+                    <option value="breakup">Breakup Story</option>
+                    <option value="relationship-struggle">Relationship Struggle</option>
+                    <option value="finding-love">Finding Love</option>
+                    <option value="family-drama">Family Drama</option>
+                    <option value="personal-growth">Personal Growth</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+
+            <div id="submissionsList">
+                <!-- Submissions will be loaded here -->
+                <div class="no-submissions">
+                    <p>No submissions found. Check back later!</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-logo">
+                <img src="images/loveistough-logo-no-bg.png" alt="LoveIsTough Logo" class="footer-logo-img">
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 LoveIsTough.com. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        let allSubmissions = [];
+        let filteredSubmissions = [];
+
+        // Load admin data
+        async function loadAdminData() {
+            try {
+                const response = await fetch('/api/admin/stats');
+                if (response.ok) {
+                    const stats = await response.json();
+                    updateStats(stats);
+                }
+            } catch (error) {
+                console.log('Stats will be loaded from server');
+            }
+
+            try {
+                const response = await fetch('/api/admin/submissions');
+                if (response.ok) {
+                    const submissions = await response.json();
+                    allSubmissions = submissions;
+                    filteredSubmissions = submissions;
+                    displaySubmissions(submissions);
+                }
+            } catch (error) {
+                console.log('Submissions will be loaded from server');
+            }
+        }
+
+        function updateStats(stats) {
+            document.getElementById('totalStories').textContent = stats.total || 0;
+            document.getElementById('pendingStories').textContent = stats.pending || 0;
+            document.getElementById('approvedStories').textContent = stats.approved || 0;
+            document.getElementById('deniedStories').textContent = stats.denied || 0;
+            document.getElementById('thisWeekStories').textContent = stats.thisWeek || 0;
+            document.getElementById('thisMonthStories').textContent = stats.thisMonth || 0;
+        }
+
+        function displaySubmissions(submissions) {
+            const submissionsList = document.getElementById('submissionsList');
+            
+            if (submissions.length === 0) {
+                submissionsList.innerHTML = '<div class="no-submissions"><p>No submissions found. Check back later!</p></div>';
+                return;
+            }
+
+            submissionsList.innerHTML = submissions.map(submission => `
+                <div class="submission-item" data-id="${submission.id}">
+                    <div class="submission-status status-${submission.status}">${submission.status.toUpperCase()}</div>
+                    
+                    <div class="submission-header">
+                        <div class="submission-title">${submission.title}</div>
+                        <div class="submission-meta">
+                            ${formatDate(submission.timestamp)} • ${submission.category.replace('-', ' ')}
+                        </div>
+                    </div>
+                    
+                    <div class="submission-content">
+                        ${submission.content.length > 500 ? submission.content.substring(0, 500) + '...' : submission.content}
+                    </div>
+                    
+                    ${submission.status === 'pending' ? `
+                        <div class="submission-actions">
+                            <button class="btn-approve" onclick="handleSubmission('${submission.id}', 'approve')">Approve</button>
+                            <button class="btn-deny" onclick="handleSubmission('${submission.id}', 'deny')">Deny</button>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        async function handleSubmission(submissionId, action) {
+            try {
+                const response = await fetch('/api/admin/submissions', {
+                    method: 'PATCH',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        id: submissionId,
+                        action: action
+                    })
+                });
+
+                if (response.ok) {
+                    // Update local data
+                    const submission = allSubmissions.find(s => s.id === submissionId);
+                    if (submission) {
+                        submission.status = action === 'approve' ? 'approved' : 'denied';
+                    }
+                    
+                    // Reapply filters and refresh display
+                    applyFilters();
+                    
+                    // Show success message
+                    showMessage(`Story ${action === 'approve' ? 'approved' : 'denied'} successfully!`, 'success');
+                } else {
+                    showMessage('Error updating submission. Please try again.', 'error');
+                }
+            } catch (error) {
+                showMessage('Error updating submission. Please try again.', 'error');
+            }
+        }
+
+        function applyFilters() {
+            const statusFilter = document.getElementById('statusFilter').value;
+            const categoryFilter = document.getElementById('categoryFilter').value;
+
+            filteredSubmissions = allSubmissions.filter(submission => {
+                const statusMatch = statusFilter === 'all' || submission.status === statusFilter;
+                const categoryMatch = categoryFilter === 'all' || submission.category === categoryFilter;
+                return statusMatch && categoryMatch;
+            });
+
+            displaySubmissions(filteredSubmissions);
+        }
+
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            const now = new Date();
+            const diffTime = Math.abs(now - date);
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays === 0) return 'Today';
+            if (diffDays === 1) return 'Yesterday';
+            if (diffDays < 7) return `${diffDays} days ago`;
+            if (diffDays < 30) return `${Math.ceil(diffDays / 7)} weeks ago`;
+            return date.toLocaleDateString();
+        }
+
+        function showMessage(message, type) {
+            // Create a simple notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 1rem 2rem;
+                border-radius: var(--border-radius);
+                color: white;
+                font-family: 'Open Sans', sans-serif;
+                font-weight: 600;
+                z-index: 1000;
+                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+            `;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.remove();
+            }, 3000);
+        }
+
+        // Event listeners
+        document.getElementById('statusFilter').addEventListener('change', applyFilters);
+        document.getElementById('categoryFilter').addEventListener('change', applyFilters);
+
+        // Load data when page loads
+        document.addEventListener('DOMContentLoaded', loadAdminData);
+    </script>
+</body>
+</html>

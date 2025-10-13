@@ -271,6 +271,36 @@ module.exports = async (req, res) => {
                 await handleListMemes(res);
                 break;
 
+            // Story submission endpoints
+            case 'stories':
+                if (method === 'GET') {
+                    await handleGetStories(res, req.query);
+                } else if (method === 'POST') {
+                    if (!rateLimit(req, 'story-submission', 5)) return sendErrorResponse(res, 429, 'Too many submissions, try again later');
+                    await handleSubmitStory(res, params);
+                } else {
+                    return sendErrorResponse(res, 405, 'Method not allowed');
+                }
+                break;
+
+            // Admin story management endpoints
+            case 'admin/stats':
+                if (method !== 'GET' && method !== 'POST') {
+                    return sendErrorResponse(res, 405, 'Method not allowed');
+                }
+                await handleAdminStats(res);
+                break;
+
+            case 'admin/submissions':
+                if (method === 'GET') {
+                    await handleGetSubmissions(res, req.query);
+                } else if (method === 'PATCH') {
+                    await handleUpdateSubmission(res, params);
+                } else {
+                    return sendErrorResponse(res, 405, 'Method not allowed');
+                }
+                break;
+
             // Auth enhancements
             case 'request-password-reset':
                 if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
@@ -745,6 +775,128 @@ async function handleSubscriptionReactivate(res) {
 
 async function handleSubscriptionPlans(res) {
     return sendSuccessResponse(res, { plans: Object.values(subscriptionPlans) }, 'Plans');
+}
+
+// Story submission handler
+async function handleSubmitStory(res, params) {
+    try {
+        const { title, content, category } = params;
+        
+        if (!content || content.trim().length < 10) {
+            return sendErrorResponse(res, 400, 'Story content is required and must be at least 10 characters');
+        }
+        
+        // In a real implementation, you'd save to database
+        // For now, we'll use a simple in-memory store
+        const story = {
+            id: `story_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            title: title || 'Untitled Story',
+            content: content.trim(),
+            category: category || 'other',
+            status: 'pending',
+            timestamp: new Date().toISOString()
+        };
+        
+        // Store in memory (replace with database in production)
+        if (!global.stories) global.stories = [];
+        global.stories.push(story);
+        
+        sendSuccessResponse(res, { storyId: story.id }, 'Story submitted successfully. It will be reviewed before being published.');
+    } catch (error) {
+        sendErrorResponse(res, 500, 'Failed to submit story', error.message);
+    }
+}
+
+// Get approved stories handler
+async function handleGetStories(res, params) {
+    try {
+        const { limit = 20, offset = 0 } = params;
+        
+        // In a real implementation, you'd query the database
+        const stories = (global.stories || [])
+            .filter(story => story.status === 'approved')
+            .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
+            .slice(parseInt(offset), parseInt(offset) + parseInt(limit));
+        
+        sendSuccessResponse(res, stories, 'Stories retrieved successfully');
+    } catch (error) {
+        sendErrorResponse(res, 500, 'Failed to retrieve stories', error.message);
+    }
+}
+
+// Admin stats handler
+async function handleAdminStats(res) {
+    try {
+        const stories = global.stories || [];
+        const now = new Date();
+        const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+        const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+        
+        const stats = {
+            total: stories.length,
+            pending: stories.filter(s => s.status === 'pending').length,
+            approved: stories.filter(s => s.status === 'approved').length,
+            denied: stories.filter(s => s.status === 'denied').length,
+            thisWeek: stories.filter(s => new Date(s.timestamp) >= oneWeekAgo).length,
+            thisMonth: stories.filter(s => new Date(s.timestamp) >= oneMonthAgo).length
+        };
+        
+        sendSuccessResponse(res, stats, 'Admin stats retrieved successfully');
+    } catch (error) {
+        sendErrorResponse(res, 500, 'Failed to retrieve admin stats', error.message);
+    }
+}
+
+// Get all submissions for admin
+async function handleGetSubmissions(res, params) {
+    try {
+        const { status, category, limit = 50, offset = 0 } = params;
+        
+        let stories = global.stories || [];
+        
+        // Apply filters
+        if (status && status !== 'all') {
+            stories = stories.filter(s => s.status === status);
+        }
+        if (category && category !== 'all') {
+            stories = stories.filter(s => s.category === category);
+        }
+        
+        // Sort by timestamp (newest first)
+        stories = stories.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+        
+        // Apply pagination
+        stories = stories.slice(parseInt(offset), parseInt(offset) + parseInt(limit));
+        
+        sendSuccessResponse(res, stories, 'Submissions retrieved successfully');
+    } catch (error) {
+        sendErrorResponse(res, 500, 'Failed to retrieve submissions', error.message);
+    }
+}
+
+// Update submission status (approve/deny)
+async function handleUpdateSubmission(res, params) {
+    try {
+        const { id, action } = params;
+        
+        if (!id || !action || !['approve', 'deny'].includes(action)) {
+            return sendErrorResponse(res, 400, 'Valid id and action (approve/deny) are required');
+        }
+        
+        const stories = global.stories || [];
+        const storyIndex = stories.findIndex(s => s.id === id);
+        
+        if (storyIndex === -1) {
+            return sendErrorResponse(res, 404, 'Story not found');
+        }
+        
+        stories[storyIndex].status = action === 'approve' ? 'approved' : 'denied';
+        stories[storyIndex].reviewedAt = new Date().toISOString();
+        
+        sendSuccessResponse(res, { story: stories[storyIndex] }, `Story ${action}d successfully`);
+    } catch (error) {
+        sendErrorResponse(res, 500, 'Failed to update submission', error.message);
+    }
 }
 
 // Minimal 302 helper for go-links
