@@ -46,6 +46,10 @@
       "use": "@vercel/static"
     },
     {
+      "src": "analytics.js",
+      "use": "@vercel/static"
+    },
+    {
       "src": "sw.js",
       "use": "@vercel/static"
     },

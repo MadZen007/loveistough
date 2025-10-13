@@ -404,6 +404,75 @@
             </div>
         </div>
 
+        <!-- Analytics Section -->
+        <div class="analytics-section" style="background: var(--admin-card-bg); padding: 2rem; border-radius: 8px; border: 2px solid var(--admin-border); margin-bottom: 2rem;">
+            <h2 style="color: var(--admin-text); margin-bottom: 2rem; font-size: 1.5rem; font-weight: 600; border-bottom: 2px solid var(--admin-border); padding-bottom: 0.5rem;">Site Analytics</h2>
+            
+            <!-- Analytics Controls -->
+            <div class="analytics-controls" style="display: flex; gap: 1rem; margin-bottom: 2rem; align-items: center; flex-wrap: wrap; background: var(--admin-bg); padding: 1.5rem; border-radius: 8px; border: 2px solid var(--admin-border);">
+                <div style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+                    <label for="analyticsPeriod" style="color: var(--admin-text); font-weight: 600;">Time Period:</label>
+                    <select id="analyticsPeriod" class="filter-select">
+                        <option value="day">Last 24 Hours</option>
+                        <option value="week" selected>Last Week</option>
+                        <option value="month">Last Month</option>
+                        <option value="total">All Time</option>
+                    </select>
+                    
+                    <label for="analyticsPage" style="color: var(--admin-text); font-weight: 600;">Page:</label>
+                    <select id="analyticsPage" class="filter-select">
+                        <option value="all">All Pages</option>
+                        <option value="home">Homepage</option>
+                        <option value="stories">Stories</option>
+                        <option value="about-me">About Me</option>
+                        <option value="book">Book</option>
+                        <option value="admin">Admin</option>
+                    </select>
+                </div>
+                
+                <button id="refreshAnalyticsBtn" class="refresh-btn">
+                    <span>📊</span>
+                    Refresh Analytics
+                </button>
+            </div>
+
+            <!-- Analytics Stats -->
+            <div class="analytics-stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 1.5rem; margin-bottom: 2rem;">
+                <div class="stat-card">
+                    <div class="stat-number" id="totalPageViews">0</div>
+                    <div class="stat-label">Page Views</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="uniqueSessions">0</div>
+                    <div class="stat-label">Unique Sessions</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="avgTimeOnPage">0s</div>
+                    <div class="stat-label">Avg Time on Page</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-number" id="totalEvents">0</div>
+                    <div class="stat-label">Total Events</div>
+                </div>
+            </div>
+
+            <!-- Page Breakdown -->
+            <div class="page-breakdown" style="background: var(--admin-bg); padding: 1.5rem; border-radius: 8px; border: 2px solid var(--admin-border); margin-bottom: 2rem;">
+                <h3 style="color: var(--admin-accent); margin-bottom: 1rem; font-size: 1.2rem; font-weight: 600;">Page Views Breakdown</h3>
+                <div id="pageBreakdownList" style="display: grid; gap: 1rem;">
+                    <!-- Page breakdown will be populated here -->
+                </div>
+            </div>
+
+            <!-- Event Breakdown -->
+            <div class="event-breakdown" style="background: var(--admin-bg); padding: 1.5rem; border-radius: 8px; border: 2px solid var(--admin-border);">
+                <h3 style="color: var(--admin-accent); margin-bottom: 1rem; font-size: 1.2rem; font-weight: 600;">Event Activity</h3>
+                <div id="eventBreakdownList" style="display: grid; gap: 1rem;">
+                    <!-- Event breakdown will be populated here -->
+                </div>
+            </div>
+        </div>
+
         <!-- Submissions Management -->
         <div class="submissions-section">
             <h2 style="color: var(--color-primary); margin-bottom: 1.5rem; font-family: var(--font-heading);">Story Submissions</h2>
@@ -458,6 +527,7 @@
         </div>
     </footer>
 
+    <script src="analytics.js"></script>
     <script>
         let allSubmissions = [];
         let filteredSubmissions = [];
@@ -612,13 +682,83 @@
             }, 3000);
         }
 
+        // Analytics functions
+        async function loadAnalytics() {
+            try {
+                const period = document.getElementById('analyticsPeriod').value;
+                const page = document.getElementById('analyticsPage').value;
+                
+                const params = new URLSearchParams({ period });
+                if (page !== 'all') params.append('page', page);
+                
+                const response = await fetch(`/api/admin/analytics?${params}`);
+                if (response.ok) {
+                    const data = await response.json();
+                    updateAnalyticsDisplay(data);
+                }
+            } catch (error) {
+                console.log('Analytics will be loaded from server');
+            }
+        }
+
+        function updateAnalyticsDisplay(data) {
+            // Update main stats
+            document.getElementById('totalPageViews').textContent = data.stats.pageViews || 0;
+            document.getElementById('uniqueSessions').textContent = data.stats.uniqueSessions || 0;
+            document.getElementById('avgTimeOnPage').textContent = (data.avgTimeOnPage || 0) + 's';
+            document.getElementById('totalEvents').textContent = data.stats.totalEvents || 0;
+
+            // Update page breakdown
+            const pageBreakdownList = document.getElementById('pageBreakdownList');
+            if (Object.keys(data.pageBreakdown || {}).length > 0) {
+                pageBreakdownList.innerHTML = Object.entries(data.pageBreakdown)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([page, views]) => `
+                        <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--admin-card-bg); border-radius: 6px; border: 1px solid var(--admin-border);">
+                            <span style="color: var(--admin-text); font-weight: 600; text-transform: capitalize;">${page.replace('-', ' ')}</span>
+                            <span style="color: var(--admin-accent); font-weight: 700; font-size: 1.1rem;">${views} views</span>
+                        </div>
+                    `).join('');
+            } else {
+                pageBreakdownList.innerHTML = '<p style="color: var(--admin-text-muted); text-align: center; font-style: italic;">No page views data available</p>';
+            }
+
+            // Update event breakdown
+            const eventBreakdownList = document.getElementById('eventBreakdownList');
+            if (Object.keys(data.eventBreakdown || {}).length > 0) {
+                eventBreakdownList.innerHTML = Object.entries(data.eventBreakdown)
+                    .sort(([,a], [,b]) => b - a)
+                    .map(([eventKey, count]) => {
+                        const [page, eventType] = eventKey.split(':');
+                        return `
+                            <div style="display: flex; justify-content: space-between; align-items: center; padding: 1rem; background: var(--admin-card-bg); border-radius: 6px; border: 1px solid var(--admin-border);">
+                                <div>
+                                    <span style="color: var(--admin-text); font-weight: 600; text-transform: capitalize;">${page.replace('-', ' ')}</span>
+                                    <span style="color: var(--admin-text-muted); margin: 0 0.5rem;">•</span>
+                                    <span style="color: var(--admin-text); font-size: 0.9rem;">${eventType.replace('_', ' ')}</span>
+                                </div>
+                                <span style="color: var(--admin-accent); font-weight: 700; font-size: 1.1rem;">${count}</span>
+                            </div>
+                        `;
+                    }).join('');
+            } else {
+                eventBreakdownList.innerHTML = '<p style="color: var(--admin-text-muted); text-align: center; font-style: italic;">No event data available</p>';
+            }
+        }
+
         // Event listeners
         document.getElementById('statusFilter').addEventListener('change', applyFilters);
         document.getElementById('categoryFilter').addEventListener('change', applyFilters);
         document.getElementById('refreshBtn').addEventListener('click', loadAdminData);
+        document.getElementById('analyticsPeriod').addEventListener('change', loadAnalytics);
+        document.getElementById('analyticsPage').addEventListener('change', loadAnalytics);
+        document.getElementById('refreshAnalyticsBtn').addEventListener('click', loadAnalytics);
 
         // Load data when page loads
-        document.addEventListener('DOMContentLoaded', loadAdminData);
+        document.addEventListener('DOMContentLoaded', () => {
+            loadAdminData();
+            loadAnalytics();
+        });
     </script>
 </body>
 </html>

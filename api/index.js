@@ -301,6 +301,25 @@ module.exports = async (req, res) => {
                 }
                 break;
 
+            // Analytics endpoints
+            case 'analytics':
+                if (method === 'POST') {
+                    await handleAnalyticsTracking(res, params);
+                } else if (method === 'GET') {
+                    await handleGetAnalytics(res, req.query);
+                } else {
+                    return sendErrorResponse(res, 405, 'Method not allowed');
+                }
+                break;
+
+            case 'admin/analytics':
+                if (method === 'GET') {
+                    await handleAdminAnalytics(res, req.query);
+                } else {
+                    return sendErrorResponse(res, 405, 'Method not allowed');
+                }
+                break;
+
             // Auth enhancements
             case 'request-password-reset':
                 if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
@@ -896,6 +915,175 @@ async function handleUpdateSubmission(res, params) {
         sendSuccessResponse(res, { story: stories[storyIndex] }, `Story ${action}d successfully`);
     } catch (error) {
         sendErrorResponse(res, 500, 'Failed to update submission', error.message);
+    }
+}
+
+// Analytics tracking handler
+async function handleAnalyticsTracking(res, params) {
+    try {
+        const { type, page, sessionId, timestamp, eventType, ...eventData } = params;
+        
+        if (!type || !page || !timestamp) {
+            return sendErrorResponse(res, 400, 'Missing required analytics data');
+        }
+
+        // Store analytics data in memory (replace with database in production)
+        const analyticsData = {
+            id: `analytics_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`,
+            type,
+            page,
+            sessionId,
+            timestamp,
+            eventType,
+            ...eventData,
+            ip: res.req.headers['x-forwarded-for'] || res.req.connection.remoteAddress || 'unknown'
+        };
+
+        if (!global.analytics) global.analytics = [];
+        global.analytics.push(analyticsData);
+
+        // Keep only last 10000 entries to prevent memory issues
+        if (global.analytics.length > 10000) {
+            global.analytics = global.analytics.slice(-8000);
+        }
+
+        sendSuccessResponse(res, { id: analyticsData.id }, 'Analytics tracked');
+    } catch (error) {
+        sendErrorResponse(res, 500, 'Failed to track analytics', error.message);
+    }
+}
+
+// Get analytics data (public endpoint for basic stats)
+async function handleGetAnalytics(res, params) {
+    try {
+        const { page, days = 30 } = params;
+        const cutoffDate = new Date(Date.now() - days * 24 * 60 * 60 * 1000);
+        
+        let analytics = global.analytics || [];
+        
+        // Filter by date and page if specified
+        analytics = analytics.filter(item => 
+            new Date(item.timestamp) >= cutoffDate && 
+            (!page || item.page === page)
+        );
+
+        // Group by page
+        const pageStats = analytics.reduce((acc, item) => {
+            if (item.type === 'page_view') {
+                acc[item.page] = (acc[item.page] || 0) + 1;
+            }
+            return acc;
+        }, {});
+
+        sendSuccessResponse(res, { pageStats, totalEvents: analytics.length }, 'Analytics retrieved');
+    } catch (error) {
+        sendErrorResponse(res, 500, 'Failed to retrieve analytics', error.message);
+    }
+}
+
+// Admin analytics handler with detailed stats and time filtering
+async function handleAdminAnalytics(res, params) {
+    try {
+        const { period = 'week', page, startDate, endDate } = params;
+        
+        let analytics = global.analytics || [];
+        let filteredAnalytics = [...analytics];
+
+        // Apply date filtering
+        if (startDate && endDate) {
+            const start = new Date(startDate);
+            const end = new Date(endDate);
+            filteredAnalytics = filteredAnalytics.filter(item => {
+                const itemDate = new Date(item.timestamp);
+                return itemDate >= start && itemDate <= end;
+            });
+        } else {
+            // Apply period filtering
+            const now = new Date();
+            let cutoffDate;
+            
+            switch (period) {
+                case 'day':
+                    cutoffDate = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+                    break;
+                case 'week':
+                    cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+                    break;
+                case 'month':
+                    cutoffDate = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
+                    break;
+                case 'total':
+                    cutoffDate = new Date(0); // All time
+                    break;
+                default:
+                    cutoffDate = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
+            }
+            
+            filteredAnalytics = filteredAnalytics.filter(item => 
+                new Date(item.timestamp) >= cutoffDate
+            );
+        }
+
+        // Filter by page if specified
+        if (page && page !== 'all') {
+            filteredAnalytics = filteredAnalytics.filter(item => item.page === page);
+        }
+
+        // Calculate statistics
+        const stats = {
+            totalEvents: filteredAnalytics.length,
+            pageViews: filteredAnalytics.filter(item => item.type === 'page_view').length,
+            uniqueSessions: new Set(filteredAnalytics.map(item => item.sessionId)).size,
+            events: filteredAnalytics.filter(item => item.type === 'event').length,
+            pageExits: filteredAnalytics.filter(item => item.type === 'page_exit').length
+        };
+
+        // Page breakdown
+        const pageBreakdown = filteredAnalytics
+            .filter(item => item.type === 'page_view')
+            .reduce((acc, item) => {
+                acc[item.page] = (acc[item.page] || 0) + 1;
+                return acc;
+            }, {});
+
+        // Event breakdown
+        const eventBreakdown = filteredAnalytics
+            .filter(item => item.type === 'event')
+            .reduce((acc, item) => {
+                const key = `${item.page}:${item.eventType}`;
+                acc[key] = (acc[key] || 0) + 1;
+                return acc;
+            }, {});
+
+        // Daily/hourly breakdown
+        const timeBreakdown = filteredAnalytics.reduce((acc, item) => {
+            const date = new Date(item.timestamp);
+            const key = period === 'day' ? 
+                date.getHours().toString().padStart(2, '0') + ':00' :
+                date.toISOString().split('T')[0];
+            acc[key] = (acc[key] || 0) + 1;
+            return acc;
+        }, {});
+
+        // Average time on page
+        const pageExitData = filteredAnalytics.filter(item => item.type === 'page_exit' && item.timeOnPage);
+        const avgTimeOnPage = pageExitData.length > 0 ? 
+            pageExitData.reduce((sum, item) => sum + item.timeOnPage, 0) / pageExitData.length : 0;
+
+        const analyticsData = {
+            stats,
+            pageBreakdown,
+            eventBreakdown,
+            timeBreakdown,
+            avgTimeOnPage: Math.round(avgTimeOnPage / 1000), // Convert to seconds
+            period,
+            filteredCount: filteredAnalytics.length,
+            totalCount: analytics.length
+        };
+
+        sendSuccessResponse(res, analyticsData, 'Admin analytics retrieved');
+    } catch (error) {
+        sendErrorResponse(res, 500, 'Failed to retrieve admin analytics', error.message);
     }
 }
 
