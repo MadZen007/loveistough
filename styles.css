@@ -506,6 +506,34 @@ h1, h2, h3, h4, h5, h6 {
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 } 
 
+/* About Me Page Styling */
+.about-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.about-content p {
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: var(--spacing-md);
+    color: var(--white);
+    text-align: left;
+}
+
+.about-intro {
+    font-style: italic;
+    color: var(--slate-gray) !important;
+    border-left: 3px solid var(--vibrant-red);
+    padding-left: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg) !important;
+}
+
+.back-button-container {
+    text-align: center;
+    margin-top: var(--spacing-lg);
+}
+
 /* Generic Modal (used for Login/Signup) */
 .modal-overlay {
 	position: fixed;
