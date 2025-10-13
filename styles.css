@@ -538,6 +538,23 @@ h1, h2, h3, h4, h5, h6 {
     margin-top: var(--spacing-lg);
 }
 
+/* About Me Image Styling */
+.about-image-container {
+    text-align: center;
+    margin: var(--spacing-lg) 0;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.about-me-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 15px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--slate-gray);
+}
+
 /* Generic Modal (used for Login/Signup) */
 .modal-overlay {
 	position: fixed;
