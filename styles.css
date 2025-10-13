@@ -10,7 +10,7 @@
     
     /* Typography */
     --font-header: 'Amatic SC', cursive;
-    --font-body: 'Bebas Neue', sans-serif;
+    --font-body: 'Open Sans', sans-serif;
     
     /* Spacing */
     --spacing-xs: 0.5rem;
@@ -158,14 +158,14 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .hero-subtitle {
-    font-family: 'Bebas Neue', sans-serif !important;
+    font-family: 'Open Sans', sans-serif !important;
     font-size: 1.3rem;
     margin-bottom: var(--spacing-md);
     color: var(--slate-gray);
 }
 
 .hero-body {
-    font-family: 'Bebas Neue', sans-serif !important;
+    font-family: 'Open Sans', sans-serif !important;
     font-size: 1.1rem;
     margin-bottom: var(--spacing-lg);
     color: var(--slate-gray);
@@ -202,7 +202,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .hero-card p {
-    font-family: 'Bebas Neue', sans-serif !important;
+    font-family: 'Open Sans', sans-serif !important;
     font-size: 0.95rem;
     margin-bottom: var(--spacing-sm);
     color: var(--slate-gray);
@@ -517,7 +517,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .about-content p {
-    font-family: 'Bebas Neue', sans-serif !important;
+    font-family: 'Open Sans', sans-serif !important;
     font-size: 1.1rem;
     line-height: 1.7;
     margin-bottom: var(--spacing-md);
