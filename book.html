@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Book - LoveIsTough.com</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Amatic+SC:wght@400;700&family=Open+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link rel="canonical" href="https://www.loveistough.com/book/" />
+</head>
+<body>
+    <!-- Header -->
+    <header class="main-header">
+        <div class="header-container">
+            <div class="logo-section">
+                <a href="index.html"><img src="images/loveistough-logo-no-bg.png" alt="LoveIsTough Logo" class="main-logo"></a>
+            </div>
+            <div class="auth-section">
+                <a href="#" id="loginBtn" class="auth-link">Log In</a>
+                <a href="#" id="signupBtn" class="auth-link primary">Sign Up</a>
+                <a href="#" id="logoutBtn" class="auth-link" style="display: none;">Logout</a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="hero-section">
+        <div class="hero-container">
+            <div class="hero-content">
+                <h1 class="hero-title">My Book</h1>
+                
+                <div class="book-image-container">
+                    <img src="images/book-cover-placeholder.png" alt="Book Cover" class="book-cover-image">
+                </div>
+                
+                <div class="book-content">
+                    <p class="book-intro">[PLACEHOLDER: Short description of your book - what it's about, why you wrote it, what readers will learn]</p>
+                    
+                    <p>[PLACEHOLDER: Additional details about the book - key topics covered, your unique perspective, what makes it different]</p>
+
+                    <p>[PLACEHOLDER: Personal note about the book - your journey writing it, what it means to you, etc.]</p>
+                </div>
+
+                <div class="book-images-grid">
+                    <div class="book-image-item">
+                        <img src="images/book-image-1-placeholder.png" alt="Book Image 1" class="book-gallery-image">
+                        <p class="book-image-caption">[PLACEHOLDER: Caption for image 1]</p>
+                    </div>
+                    <div class="book-image-item">
+                        <img src="images/book-image-2-placeholder.png" alt="Book Image 2" class="book-gallery-image">
+                        <p class="book-image-caption">[PLACEHOLDER: Caption for image 2]</p>
+                    </div>
+                </div>
+
+                <!-- Amazon Purchase Button -->
+                <div class="purchase-button-container" style="margin-top: 2rem; text-align: center;">
+                    <a href="[PLACEHOLDER: Amazon URL]" target="_blank" rel="noopener" class="hero-card-btn">Buy on Amazon</a>
+                </div>
+
+                <!-- Back to Home Button -->
+                <div class="back-button-container" style="margin-top: 1rem; text-align: center;">
+                    <a href="index.html" class="hero-card-btn">Back to Home</a>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="main-footer">
+        <div class="container">
+            <div class="footer-logo">
+                <img src="images/loveistough-logo-no-bg.png" alt="LoveIsTough Logo" class="footer-logo-img">
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 LoveIsTough.com. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Meme Button -->
+    <div class="meme-button" id="memeButton">
+        <img src="images/L.I.T.-meme-button.png" alt="Random Meme" class="meme-icon">
+        <span class="meme-text">Random Meme</span>
+    </div>
+
+    <!-- Meme Modal -->
+    <div class="meme-modal" id="memeModal">
+        <div class="meme-modal-content">
+            <button class="meme-close" id="memeClose">&times;</button>
+            <div class="meme-container">
+                <img id="memeImage" src="" alt="Random Meme" class="meme-img">
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

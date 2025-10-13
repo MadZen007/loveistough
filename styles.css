@@ -555,6 +555,88 @@ h1, h2, h3, h4, h5, h6 {
     border: 2px solid var(--slate-gray);
 }
 
+/* Book Page Styling */
+.book-content {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 0 var(--spacing-md);
+}
+
+.book-content p {
+    font-family: 'Open Sans', sans-serif !important;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    margin-bottom: var(--spacing-md);
+    color: var(--white);
+    text-align: left;
+}
+
+.book-intro {
+    font-style: italic;
+    color: var(--slate-gray) !important;
+    border-left: 3px solid var(--vibrant-red);
+    padding-left: var(--spacing-sm);
+    margin-bottom: var(--spacing-lg) !important;
+}
+
+.book-image-container {
+    text-align: center;
+    margin: var(--spacing-lg) 0;
+    max-width: 400px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.book-cover-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    border: 2px solid var(--slate-gray);
+}
+
+.book-images-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-md);
+    margin: var(--spacing-lg) 0;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.book-image-item {
+    text-align: center;
+}
+
+.book-gallery-image {
+    max-width: 100%;
+    height: auto;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    border: 2px solid var(--slate-gray);
+    margin-bottom: var(--spacing-sm);
+}
+
+.book-image-caption {
+    font-family: 'Open Sans', sans-serif !important;
+    font-size: 0.9rem;
+    color: var(--slate-gray);
+    font-style: italic;
+}
+
+.purchase-button-container {
+    text-align: center;
+    margin-top: var(--spacing-lg);
+}
+
+@media (max-width: 768px) {
+    .book-images-grid {
+        grid-template-columns: 1fr;
+        gap: var(--spacing-sm);
+    }
+}
+
 /* Generic Modal (used for Login/Signup) */
 .modal-overlay {
 	position: fixed;
