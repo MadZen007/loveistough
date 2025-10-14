@@ -217,7 +217,8 @@
                     body: JSON.stringify({ action: 'get-stories' })
                 });
                 if (response.ok) {
-                    const stories = await response.json();
+                    const result = await response.json();
+                    const stories = result.data || result;
                     displayStories(stories);
                 }
             } catch (error) {

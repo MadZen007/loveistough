@@ -114,15 +114,25 @@ class AnalyticsTracker {
 
     sendAnalytics(data) {
         try {
+            const payload = {
+                action: 'analytics',
+                ...data
+            };
+            console.log('Sending analytics:', payload);
+            
             fetch('/api', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({
-                    action: 'analytics',
-                    ...data
-                })
+                body: JSON.stringify(payload)
+            }).then(response => {
+                if (!response.ok) {
+                    console.log('Analytics response not ok:', response.status, response.statusText);
+                }
+                return response.json();
+            }).then(data => {
+                console.log('Analytics response:', data);
             }).catch(error => {
                 // Silently fail for analytics - don't break user experience
                 console.log('Analytics tracking failed:', error);

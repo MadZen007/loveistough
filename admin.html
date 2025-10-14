@@ -543,7 +543,8 @@
                     body: JSON.stringify({ action: 'admin/stats' })
                 });
                 if (response.ok) {
-                    const stats = await response.json();
+                    const result = await response.json();
+                    const stats = result.data || result;
                     updateStats(stats);
                 }
             } catch (error) {
@@ -559,7 +560,8 @@
                     body: JSON.stringify({ action: 'get-submissions' })
                 });
                 if (response.ok) {
-                    const submissions = await response.json();
+                    const result = await response.json();
+                    const submissions = result.data || result;
                     allSubmissions = submissions;
                     filteredSubmissions = submissions;
                     displaySubmissions(submissions);
@@ -717,7 +719,8 @@
                     })
                 });
                 if (response.ok) {
-                    const data = await response.json();
+                    const result = await response.json();
+                    const data = result.data || result;
                     updateAnalyticsDisplay(data);
                 }
             } catch (error) {
