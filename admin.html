@@ -570,8 +570,12 @@
                 });
                 if (response.ok) {
                     const result = await response.json();
+                    console.log('Admin stats response:', result);
                     const stats = result.data || result;
+                    console.log('Stats to update:', stats);
                     updateStats(stats);
+                } else {
+                    console.log('Admin stats request failed:', response.status);
                 }
             } catch (error) {
                 console.log('Stats will be loaded from server');
@@ -602,12 +606,14 @@
         }
 
         function updateStats(stats) {
+            console.log('Updating stats with:', stats);
             document.getElementById('totalStories').textContent = stats.total || 0;
             document.getElementById('pendingStories').textContent = stats.pending || 0;
             document.getElementById('approvedStories').textContent = stats.approved || 0;
             document.getElementById('deniedStories').textContent = stats.denied || 0;
             document.getElementById('thisWeekStories').textContent = stats.thisWeek || 0;
             document.getElementById('thisMonthStories').textContent = stats.thisMonth || 0;
+            console.log('Stats updated successfully');
         }
 
         function displaySubmissions(submissions) {
@@ -632,7 +638,7 @@
                             ${submission.content.length > 500 ? submission.content.substring(0, 500) + '...' : submission.content}
                         </div>
                         ${submission.content.length > 500 ? `
-                            <button class="read-more-btn" onclick="toggleStory('${submission.id}', '${submission.content.replace(/'/g, "\\'")}')">
+                            <button class="read-more-btn" data-story-id="${submission.id}" data-full-content="${submission.content.replace(/"/g, '&quot;')}">
                                 Read Full Story
                             </button>
                         ` : ''}
@@ -821,9 +827,17 @@
         document.getElementById('refreshAnalyticsBtn').addEventListener('click', loadAnalytics);
 
         // Toggle story content between truncated and full
-        function toggleStory(storyId, fullContent) {
+        // Event delegation for read more buttons
+        document.addEventListener('click', function(e) {
+            if (e.target.classList.contains('read-more-btn')) {
+                const storyId = e.target.getAttribute('data-story-id');
+                const fullContent = e.target.getAttribute('data-full-content');
+                toggleStory(storyId, fullContent, e.target);
+            }
+        });
+
+        function toggleStory(storyId, fullContent, button) {
             const storyElement = document.getElementById(`story-${storyId}`);
-            const button = storyElement.nextElementSibling;
             
             if (storyElement.textContent.includes('...')) {
                 // Show full content
