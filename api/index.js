@@ -273,14 +273,18 @@ module.exports = async (req, res) => {
 
             // Story submission endpoints
             case 'stories':
-                if (method === 'GET') {
-                    await handleGetStories(res, req.query);
-                } else if (method === 'POST') {
-                    if (!rateLimit(req, 'story-submission', 5)) return sendErrorResponse(res, 429, 'Too many submissions, try again later');
-                    await handleSubmitStory(res, params);
-                } else {
+                if (method !== 'POST') {
                     return sendErrorResponse(res, 405, 'Method not allowed');
                 }
+                if (!rateLimit(req, 'story-submission', 5)) return sendErrorResponse(res, 429, 'Too many submissions, try again later');
+                await handleSubmitStory(res, params);
+                break;
+
+            case 'get-stories':
+                if (method !== 'POST') {
+                    return sendErrorResponse(res, 405, 'Method not allowed');
+                }
+                await handleGetStories(res, params);
                 break;
 
             // Admin story management endpoints
@@ -288,17 +292,25 @@ module.exports = async (req, res) => {
                 if (method !== 'GET' && method !== 'POST') {
                     return sendErrorResponse(res, 405, 'Method not allowed');
                 }
-                await handleAdminStats(res);
+                await handleAdminStats(res, params);
                 break;
 
             case 'admin/submissions':
-                if (method === 'GET' || (method === 'POST' && !params.method)) {
-                    await handleGetSubmissions(res, req.query);
-                } else if (method === 'PATCH' || (method === 'POST' && params.method === 'PATCH')) {
-                    await handleUpdateSubmission(res, params);
-                } else {
+                if (method !== 'POST') {
                     return sendErrorResponse(res, 405, 'Method not allowed');
                 }
+                if (params.method === 'PATCH') {
+                    await handleUpdateSubmission(res, params);
+                } else {
+                    await handleGetSubmissions(res, params);
+                }
+                break;
+
+            case 'get-submissions':
+                if (method !== 'POST') {
+                    return sendErrorResponse(res, 405, 'Method not allowed');
+                }
+                await handleGetSubmissions(res, params);
                 break;
 
             // Analytics endpoints
@@ -799,7 +811,7 @@ async function handleSubscriptionPlans(res) {
 // Story submission handler
 async function handleSubmitStory(res, params) {
     try {
-        const { title, content, category } = params;
+        const { action, title, content, category } = params;
         
         if (!content || content.trim().length < 10) {
             return sendErrorResponse(res, 400, 'Story content is required and must be at least 10 characters');
@@ -829,7 +841,7 @@ async function handleSubmitStory(res, params) {
 // Get approved stories handler
 async function handleGetStories(res, params) {
     try {
-        const { limit = 20, offset = 0 } = params;
+        const { action, limit = 20, offset = 0 } = params;
         
         // In a real implementation, you'd query the database
         const stories = (global.stories || [])
@@ -844,7 +856,7 @@ async function handleGetStories(res, params) {
 }
 
 // Admin stats handler
-async function handleAdminStats(res) {
+async function handleAdminStats(res, params = {}) {
     try {
         const stories = global.stories || [];
         const now = new Date();
@@ -869,7 +881,7 @@ async function handleAdminStats(res) {
 // Get all submissions for admin
 async function handleGetSubmissions(res, params) {
     try {
-        const { status, category, limit = 50, offset = 0 } = params;
+        const { action, status, category, limit = 50, offset = 0 } = params;
         
         let stories = global.stories || [];
         
@@ -922,7 +934,7 @@ async function handleUpdateSubmission(res, params) {
 // Analytics tracking handler
 async function handleAnalyticsTracking(res, params) {
     try {
-        const { type, page, sessionId, timestamp, eventType, ...eventData } = params;
+        const { action, type, page, sessionId, timestamp, eventType, ...eventData } = params;
         
         if (!type || !page || !timestamp) {
             return sendErrorResponse(res, 400, 'Missing required analytics data');
@@ -985,7 +997,7 @@ async function handleGetAnalytics(res, params) {
 // Admin analytics handler with detailed stats and time filtering
 async function handleAdminAnalytics(res, params) {
     try {
-        const { period = 'week', page, startDate, endDate } = params;
+        const { action, period = 'week', page, startDate, endDate } = params;
         
         let analytics = global.analytics || [];
         let filteredAnalytics = [...analytics];

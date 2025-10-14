@@ -214,7 +214,7 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ action: 'stories' })
+                    body: JSON.stringify({ action: 'get-stories' })
                 });
                 if (response.ok) {
                     const stories = await response.json();
