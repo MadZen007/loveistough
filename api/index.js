@@ -999,12 +999,16 @@ async function handleGetStories(res, params) {
     try {
         const { action, limit = 20, offset = 0 } = params;
         
-        // In a real implementation, you'd query the database
-        const stories = (global.stories || [])
+        // Load stories from KV (same as other functions)
+        const allStories = await getStoriesFromKV();
+        console.log('handleGetStories - all stories from KV:', allStories);
+        
+        const stories = allStories
             .filter(story => story.status === 'approved')
             .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp))
             .slice(parseInt(offset), parseInt(offset) + parseInt(limit));
         
+        console.log('handleGetStories - approved stories:', stories);
         sendSuccessResponse(res, stories, 'Stories retrieved successfully');
     } catch (error) {
         sendErrorResponse(res, 500, 'Failed to retrieve stories', error.message);
