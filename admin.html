@@ -553,7 +553,7 @@
         </div>
     </footer>
 
-    <script src="analytics.js"></script>
+    <script src="analytics.js?v=2"></script>
     <script>
         let allSubmissions = [];
         let filteredSubmissions = [];
@@ -561,12 +561,19 @@
         // Load admin data
         async function loadAdminData() {
             try {
+                // Add cache-busting parameter
+                const timestamp = Date.now();
                 const response = await fetch('/api', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
+                        'Cache-Control': 'no-cache',
+                        'Pragma': 'no-cache'
                     },
-                    body: JSON.stringify({ action: 'admin/stats' })
+                    body: JSON.stringify({ 
+                        action: 'admin/stats',
+                        _t: timestamp
+                    })
                 });
                 if (response.ok) {
                     const result = await response.json();
@@ -587,7 +594,10 @@
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ action: 'get-submissions' })
+                    body: JSON.stringify({ 
+                        action: 'get-submissions',
+                        _t: timestamp
+                    })
                 });
                 if (response.ok) {
                     const result = await response.json();

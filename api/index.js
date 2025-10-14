@@ -1018,6 +1018,9 @@ async function handleAdminStats(res, params = {}) {
         const stories = await getStoriesFromKV();
         
         console.log('Admin stats - stories loaded from KV:', stories);
+        console.log('Admin stats - stories length:', stories.length);
+        console.log('Admin stats - stories statuses:', stories.map(s => ({ id: s.id, status: s.status, timestamp: s.timestamp })));
+        
         const now = new Date();
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -1031,6 +1034,7 @@ async function handleAdminStats(res, params = {}) {
             thisMonth: stories.filter(s => new Date(s.timestamp) >= oneMonthAgo).length
         };
         
+        console.log('Admin stats - calculated stats:', stats);
         sendSuccessResponse(res, stats, 'Admin stats retrieved successfully');
     } catch (error) {
         sendErrorResponse(res, 500, 'Failed to retrieve admin stats', error.message);
