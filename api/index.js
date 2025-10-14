@@ -1014,9 +1014,10 @@ async function handleGetStories(res, params) {
 // Admin stats handler
 async function handleAdminStats(res, params = {}) {
     try {
-        const stories = global.stories || [];
+        // Load stories from KV (same as submissions function)
+        const stories = await getStoriesFromKV();
         
-        console.log('Admin stats - stories in memory:', stories);
+        console.log('Admin stats - stories loaded from KV:', stories);
         const now = new Date();
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
