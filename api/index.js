@@ -180,6 +180,7 @@ module.exports = async (req, res) => {
 
         // Debug logging
         console.log('API Request:', { method, action, params, body, url: req.url, headers: req.headers });
+        console.log('Global stories at start of request:', global.stories ? global.stories.length : 'undefined');
 
         // Handle GET requests without action (browser requests, favicon, etc.)
         if (method === 'GET' && !action) {
@@ -837,9 +838,36 @@ async function handleSubmitStory(res, params) {
             timestamp: new Date().toISOString()
         };
         
-        // Store in memory (replace with database in production)
+        // Store in memory and file (for persistence in serverless environment)
         if (!global.stories) global.stories = [];
         global.stories.push(story);
+        
+        // Also save to file for persistence
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            const storiesFile = path.join('/tmp', 'stories.json');
+            
+            // Load existing stories from file
+            let fileStories = [];
+            try {
+                if (fs.existsSync(storiesFile)) {
+                    const fileContent = fs.readFileSync(storiesFile, 'utf8');
+                    fileStories = JSON.parse(fileContent);
+                }
+            } catch (e) {
+                console.log('Could not read existing stories file:', e.message);
+            }
+            
+            // Add new story
+            fileStories.push(story);
+            
+            // Save back to file
+            fs.writeFileSync(storiesFile, JSON.stringify(fileStories, null, 2));
+            console.log('Story saved to file:', storiesFile);
+        } catch (fileError) {
+            console.log('Could not save to file:', fileError.message);
+        }
         
         console.log('Story stored successfully:', story);
         console.log('Total stories in memory:', global.stories.length);
@@ -870,7 +898,26 @@ async function handleGetStories(res, params) {
 // Admin stats handler
 async function handleAdminStats(res, params = {}) {
     try {
-        const stories = global.stories || [];
+        let stories = global.stories || [];
+        
+        // If no stories in memory, try to load from file
+        if (stories.length === 0) {
+            try {
+                const fs = require('fs');
+                const path = require('path');
+                const storiesFile = path.join('/tmp', 'stories.json');
+                
+                if (fs.existsSync(storiesFile)) {
+                    const fileContent = fs.readFileSync(storiesFile, 'utf8');
+                    stories = JSON.parse(fileContent);
+                    global.stories = stories; // Update global for this request
+                    console.log('Loaded stories from file:', stories.length);
+                }
+            } catch (e) {
+                console.log('Could not load stories from file:', e.message);
+            }
+        }
+        
         console.log('Admin stats - stories in memory:', stories);
         const now = new Date();
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
@@ -898,6 +945,25 @@ async function handleGetSubmissions(res, params) {
         const { action, status, category, limit = 50, offset = 0 } = params;
         
         let stories = global.stories || [];
+        
+        // If no stories in memory, try to load from file
+        if (stories.length === 0) {
+            try {
+                const fs = require('fs');
+                const path = require('path');
+                const storiesFile = path.join('/tmp', 'stories.json');
+                
+                if (fs.existsSync(storiesFile)) {
+                    const fileContent = fs.readFileSync(storiesFile, 'utf8');
+                    stories = JSON.parse(fileContent);
+                    global.stories = stories; // Update global for this request
+                    console.log('Loaded stories from file for submissions:', stories.length);
+                }
+            } catch (e) {
+                console.log('Could not load stories from file:', e.message);
+            }
+        }
+        
         console.log('Current stories in memory:', stories);
         
         // Apply filters
@@ -939,6 +1005,17 @@ async function handleUpdateSubmission(res, params) {
         
         stories[storyIndex].status = actionToUse === 'approve' ? 'approved' : 'denied';
         stories[storyIndex].reviewedAt = new Date().toISOString();
+        
+        // Save changes back to file
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            const storiesFile = path.join('/tmp', 'stories.json');
+            fs.writeFileSync(storiesFile, JSON.stringify(stories, null, 2));
+            console.log('Story status updated in file');
+        } catch (fileError) {
+            console.log('Could not save story update to file:', fileError.message);
+        }
         
         sendSuccessResponse(res, { story: stories[storyIndex] }, `Story ${actionToUse}d successfully`);
     } catch (error) {
