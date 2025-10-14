@@ -158,73 +158,121 @@ async function parseJsonBody(req) {
     });
 }
 
-// Helper function to get stories from KV storage
+// Helper function to get stories from persistent storage
 async function getStoriesFromKV() {
     try {
         console.log('getStoriesFromKV called - kv available:', !!kv);
-        if (!kv) {
-            console.log('KV not available, using in-memory storage. Global stories:', global.stories?.length || 0);
-            return global.stories || [];
+        
+        // Try KV first
+        if (kv) {
+            console.log('Attempting to get stories from KV...');
+            const stories = await kv.get('stories');
+            console.log('KV returned stories:', stories?.length || 0, stories);
+            return stories || [];
         }
-        console.log('Attempting to get stories from KV...');
-        const stories = await kv.get('stories');
-        console.log('KV returned stories:', stories?.length || 0, stories);
-        return stories || [];
+        
+        // Fallback to file-based storage in /tmp (persists across requests in Vercel)
+        console.log('KV not available, trying file-based storage...');
+        const fs = require('fs');
+        const path = require('path');
+        const storiesFile = path.join('/tmp', 'stories.json');
+        
+        if (fs.existsSync(storiesFile)) {
+            const fileContent = fs.readFileSync(storiesFile, 'utf8');
+            const stories = JSON.parse(fileContent);
+            console.log('File-based storage returned stories:', stories?.length || 0);
+            return stories || [];
+        }
+        
+        console.log('No file found, using in-memory storage. Global stories:', global.stories?.length || 0);
+        return global.stories || [];
     } catch (error) {
-        console.log('Error loading stories from KV:', error.message);
+        console.log('Error loading stories from storage:', error.message);
         console.log('Falling back to in-memory storage. Global stories:', global.stories?.length || 0);
         return global.stories || [];
     }
 }
 
-// Helper function to save stories to KV storage
+// Helper function to save stories to persistent storage
 async function saveStoriesToKV(stories) {
     try {
-        if (!kv) {
-            console.log('KV not available, storing in memory only');
-            global.stories = stories;
+        // Try KV first
+        if (kv) {
+            await kv.set('stories', stories);
+            console.log('Stories saved to KV:', stories.length);
             return true;
         }
-        await kv.set('stories', stories);
-        console.log('Stories saved to KV:', stories.length);
+        
+        // Fallback to file-based storage in /tmp (persists across requests in Vercel)
+        console.log('KV not available, saving to file-based storage...');
+        const fs = require('fs');
+        const path = require('path');
+        const storiesFile = path.join('/tmp', 'stories.json');
+        
+        fs.writeFileSync(storiesFile, JSON.stringify(stories, null, 2));
+        console.log('Stories saved to file:', stories.length);
+        
+        // Also store in memory as backup
+        global.stories = stories;
         return true;
     } catch (error) {
-        console.log('Error saving stories to KV:', error.message);
+        console.log('Error saving stories to storage:', error.message);
         console.log('Storing in memory as fallback');
         global.stories = stories;
         return true; // Return true to continue operation
     }
 }
 
-// Helper function to get analytics from KV storage
+// Helper function to get analytics from persistent storage
 async function getAnalyticsFromKV() {
     try {
-        if (!kv) {
-            console.log('KV not available, using in-memory analytics');
-            return global.analytics || [];
+        // Try KV first
+        if (kv) {
+            const analytics = await kv.get('analytics');
+            return analytics || [];
         }
-        const analytics = await kv.get('analytics');
-        return analytics || [];
+        
+        // Fallback to file-based storage
+        const fs = require('fs');
+        const path = require('path');
+        const analyticsFile = path.join('/tmp', 'analytics.json');
+        
+        if (fs.existsSync(analyticsFile)) {
+            const fileContent = fs.readFileSync(analyticsFile, 'utf8');
+            const analytics = JSON.parse(fileContent);
+            return analytics || [];
+        }
+        
+        return global.analytics || [];
     } catch (error) {
-        console.log('Error loading analytics from KV:', error.message);
-        console.log('Falling back to in-memory analytics');
+        console.log('Error loading analytics from storage:', error.message);
         return global.analytics || [];
     }
 }
 
-// Helper function to save analytics to KV storage
+// Helper function to save analytics to persistent storage
 async function saveAnalyticsToKV(analytics) {
     try {
-        if (!kv) {
-            console.log('KV not available, storing analytics in memory only');
-            global.analytics = analytics;
+        // Try KV first
+        if (kv) {
+            await kv.set('analytics', analytics);
+            console.log('Analytics saved to KV:', analytics.length);
             return true;
         }
-        await kv.set('analytics', analytics);
-        console.log('Analytics saved to KV:', analytics.length);
+        
+        // Fallback to file-based storage
+        const fs = require('fs');
+        const path = require('path');
+        const analyticsFile = path.join('/tmp', 'analytics.json');
+        
+        fs.writeFileSync(analyticsFile, JSON.stringify(analytics, null, 2));
+        console.log('Analytics saved to file:', analytics.length);
+        
+        // Also store in memory as backup
+        global.analytics = analytics;
         return true;
     } catch (error) {
-        console.log('Error saving analytics to KV:', error.message);
+        console.log('Error saving analytics to storage:', error.message);
         console.log('Storing analytics in memory as fallback');
         global.analytics = analytics;
         return true; // Return true to continue operation
