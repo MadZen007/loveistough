@@ -93,7 +93,7 @@ class AnalyticsTracker {
             // Track story submissions
             if (target.closest('#storyForm')) {
                 this.trackEvent('story_form_interaction', {
-                    action: 'form_start'
+                    formAction: 'form_start'
                 });
             }
         });

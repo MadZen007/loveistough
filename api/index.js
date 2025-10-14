@@ -157,6 +157,29 @@ async function parseJsonBody(req) {
     });
 }
 
+// Helper function to ensure stories are loaded from file if needed
+async function ensureStoriesLoaded() {
+    if (!global.stories || global.stories.length === 0) {
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            const storiesFile = path.join('/tmp', 'stories.json');
+            
+            if (fs.existsSync(storiesFile)) {
+                const fileContent = fs.readFileSync(storiesFile, 'utf8');
+                global.stories = JSON.parse(fileContent);
+                console.log('Loaded stories from file:', global.stories.length);
+            } else {
+                global.stories = [];
+                console.log('No stories file found, initializing empty array');
+            }
+        } catch (e) {
+            console.log('Could not load stories from file:', e.message);
+            global.stories = [];
+        }
+    }
+}
+
 module.exports = async (req, res) => {
     // Apply CORS
     try {
@@ -180,7 +203,13 @@ module.exports = async (req, res) => {
 
         // Debug logging
         console.log('API Request:', { method, action, params, body, url: req.url, headers: req.headers });
-        console.log('Global stories at start of request:', global.stories ? global.stories.length : 'undefined');
+        
+        // Only load stories for actions that need them
+        const storyActions = ['stories', 'get-stories', 'admin/stats', 'get-submissions', 'admin/submissions'];
+        if (storyActions.includes(action)) {
+            console.log('Global stories at start of request:', global.stories ? global.stories.length : 'undefined');
+            await ensureStoriesLoaded();
+        }
 
         // Handle GET requests without action (browser requests, favicon, etc.)
         if (method === 'GET' && !action) {
@@ -900,25 +929,8 @@ async function handleGetStories(res, params) {
 // Admin stats handler
 async function handleAdminStats(res, params = {}) {
     try {
-        let stories = global.stories || [];
-        
-        // If no stories in memory, try to load from file
-        if (stories.length === 0) {
-            try {
-                const fs = require('fs');
-                const path = require('path');
-                const storiesFile = path.join('/tmp', 'stories.json');
-                
-                if (fs.existsSync(storiesFile)) {
-                    const fileContent = fs.readFileSync(storiesFile, 'utf8');
-                    stories = JSON.parse(fileContent);
-                    global.stories = stories; // Update global for this request
-                    console.log('Loaded stories from file:', stories.length);
-                }
-            } catch (e) {
-                console.log('Could not load stories from file:', e.message);
-            }
-        }
+        await ensureStoriesLoaded();
+        const stories = global.stories || [];
         
         console.log('Admin stats - stories in memory:', stories);
         const now = new Date();
@@ -946,25 +958,8 @@ async function handleGetSubmissions(res, params) {
         console.log('handleGetSubmissions called with params:', params);
         const { action, status, category, limit = 50, offset = 0 } = params;
         
+        await ensureStoriesLoaded();
         let stories = global.stories || [];
-        
-        // If no stories in memory, try to load from file
-        if (stories.length === 0) {
-            try {
-                const fs = require('fs');
-                const path = require('path');
-                const storiesFile = path.join('/tmp', 'stories.json');
-                
-                if (fs.existsSync(storiesFile)) {
-                    const fileContent = fs.readFileSync(storiesFile, 'utf8');
-                    stories = JSON.parse(fileContent);
-                    global.stories = stories; // Update global for this request
-                    console.log('Loaded stories from file for submissions:', stories.length);
-                }
-            } catch (e) {
-                console.log('Could not load stories from file:', e.message);
-            }
-        }
         
         console.log('Current stories in memory:', stories);
         
