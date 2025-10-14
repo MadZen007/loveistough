@@ -179,7 +179,13 @@ module.exports = async (req, res) => {
         const { method } = req;
 
         // Debug logging
-        console.log('API Request:', { method, action, params, body });
+        console.log('API Request:', { method, action, params, body, url: req.url, headers: req.headers });
+
+        // Handle GET requests without action (browser requests, favicon, etc.)
+        if (method === 'GET' && !action) {
+            console.log('GET request without action - likely browser request:', req.url);
+            return sendErrorResponse(res, 404, 'API endpoint requires action parameter');
+        }
 
         // Route based on action parameter
         switch (action) {

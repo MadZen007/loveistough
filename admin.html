@@ -674,6 +674,9 @@
                     // Reapply filters and refresh display
                     applyFilters();
                     
+                    // Reload admin stats to update the counts
+                    loadAdminData();
+                    
                     // Show success message
                     showMessage(`Story ${action === 'approve' ? 'approved' : 'denied'} successfully!`, 'success');
                 } else {
