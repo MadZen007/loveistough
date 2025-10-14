@@ -988,9 +988,10 @@ async function handleGetSubmissions(res, params) {
         console.log('handleGetSubmissions called with params:', params);
         const { action, status, category, limit = 50, offset = 0 } = params;
         
-        let stories = global.stories || [];
+        // Load stories directly from KV (same as stats function)
+        let stories = await getStoriesFromKV();
         
-        console.log('Current stories in memory:', stories);
+        console.log('Current stories loaded from KV:', stories);
         
         // Apply filters
         if (status && status !== 'all') {
@@ -1022,7 +1023,8 @@ async function handleUpdateSubmission(res, params) {
             return sendErrorResponse(res, 400, 'Valid id and action (approve/deny) are required');
         }
         
-        const stories = global.stories || [];
+        // Load stories directly from KV (same as other functions)
+        const stories = await getStoriesFromKV();
         const storyIndex = stories.findIndex(s => s.id === id);
         
         if (storyIndex === -1) {
