@@ -161,15 +161,18 @@ async function parseJsonBody(req) {
 // Helper function to get stories from KV storage
 async function getStoriesFromKV() {
     try {
+        console.log('getStoriesFromKV called - kv available:', !!kv);
         if (!kv) {
-            console.log('KV not available, using in-memory storage');
+            console.log('KV not available, using in-memory storage. Global stories:', global.stories?.length || 0);
             return global.stories || [];
         }
+        console.log('Attempting to get stories from KV...');
         const stories = await kv.get('stories');
+        console.log('KV returned stories:', stories?.length || 0, stories);
         return stories || [];
     } catch (error) {
         console.log('Error loading stories from KV:', error.message);
-        console.log('Falling back to in-memory storage');
+        console.log('Falling back to in-memory storage. Global stories:', global.stories?.length || 0);
         return global.stories || [];
     }
 }
@@ -920,10 +923,13 @@ async function handleSubmitStory(res, params) {
         // Store in memory and KV (for persistence in serverless environment)
         if (!global.stories) global.stories = [];
         global.stories.push(story);
+        console.log('Story added to global.stories. Total stories in memory:', global.stories.length);
         
         // Save to KV for persistence (with fallback to memory)
         try {
+            console.log('Attempting to save stories to KV...');
             const saved = await saveStoriesToKV(global.stories);
+            console.log('Save result:', saved);
             if (!saved) {
                 console.log('Failed to save to storage, but continuing with in-memory storage');
             }
