@@ -178,6 +178,9 @@ module.exports = async (req, res) => {
         const { action, ...params } = body || {};
         const { method } = req;
 
+        // Debug logging
+        console.log('API Request:', { method, action, params, body });
+
         // Route based on action parameter
         switch (action) {
             case 'health':
@@ -832,6 +835,9 @@ async function handleSubmitStory(res, params) {
         if (!global.stories) global.stories = [];
         global.stories.push(story);
         
+        console.log('Story stored successfully:', story);
+        console.log('Total stories in memory:', global.stories.length);
+        
         sendSuccessResponse(res, { storyId: story.id }, 'Story submitted successfully. It will be reviewed before being published.');
     } catch (error) {
         sendErrorResponse(res, 500, 'Failed to submit story', error.message);
@@ -859,6 +865,7 @@ async function handleGetStories(res, params) {
 async function handleAdminStats(res, params = {}) {
     try {
         const stories = global.stories || [];
+        console.log('Admin stats - stories in memory:', stories);
         const now = new Date();
         const oneWeekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
         const oneMonthAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
@@ -881,9 +888,11 @@ async function handleAdminStats(res, params = {}) {
 // Get all submissions for admin
 async function handleGetSubmissions(res, params) {
     try {
+        console.log('handleGetSubmissions called with params:', params);
         const { action, status, category, limit = 50, offset = 0 } = params;
         
         let stories = global.stories || [];
+        console.log('Current stories in memory:', stories);
         
         // Apply filters
         if (status && status !== 'all') {

@@ -561,10 +561,14 @@
                 });
                 if (response.ok) {
                     const result = await response.json();
+                    console.log('Admin page got submissions response:', result);
                     const submissions = result.data || result;
+                    console.log('Extracted submissions:', submissions);
                     allSubmissions = submissions;
                     filteredSubmissions = submissions;
                     displaySubmissions(submissions);
+                } else {
+                    console.log('Admin page submissions response not ok:', response.status, response.statusText);
                 }
             } catch (error) {
                 console.log('Submissions will be loaded from server');
