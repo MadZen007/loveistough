@@ -292,9 +292,9 @@ module.exports = async (req, res) => {
                 break;
 
             case 'admin/submissions':
-                if (method === 'GET') {
+                if (method === 'GET' || (method === 'POST' && !params.method)) {
                     await handleGetSubmissions(res, req.query);
-                } else if (method === 'PATCH') {
+                } else if (method === 'PATCH' || (method === 'POST' && params.method === 'PATCH')) {
                     await handleUpdateSubmission(res, params);
                 } else {
                     return sendErrorResponse(res, 405, 'Method not allowed');
@@ -896,9 +896,10 @@ async function handleGetSubmissions(res, params) {
 // Update submission status (approve/deny)
 async function handleUpdateSubmission(res, params) {
     try {
-        const { id, action } = params;
+        const { id, action, submissionAction } = params;
+        const actionToUse = submissionAction || action;
         
-        if (!id || !action || !['approve', 'deny'].includes(action)) {
+        if (!id || !actionToUse || !['approve', 'deny'].includes(actionToUse)) {
             return sendErrorResponse(res, 400, 'Valid id and action (approve/deny) are required');
         }
         
@@ -909,10 +910,10 @@ async function handleUpdateSubmission(res, params) {
             return sendErrorResponse(res, 404, 'Story not found');
         }
         
-        stories[storyIndex].status = action === 'approve' ? 'approved' : 'denied';
+        stories[storyIndex].status = actionToUse === 'approve' ? 'approved' : 'denied';
         stories[storyIndex].reviewedAt = new Date().toISOString();
         
-        sendSuccessResponse(res, { story: stories[storyIndex] }, `Story ${action}d successfully`);
+        sendSuccessResponse(res, { story: stories[storyIndex] }, `Story ${actionToUse}d successfully`);
     } catch (error) {
         sendErrorResponse(res, 500, 'Failed to update submission', error.message);
     }

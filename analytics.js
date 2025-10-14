@@ -114,12 +114,15 @@ class AnalyticsTracker {
 
     sendAnalytics(data) {
         try {
-            fetch('/api/analytics', {
+            fetch('/api', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify(data)
+                body: JSON.stringify({
+                    action: 'analytics',
+                    ...data
+                })
             }).catch(error => {
                 // Silently fail for analytics - don't break user experience
                 console.log('Analytics tracking failed:', error);

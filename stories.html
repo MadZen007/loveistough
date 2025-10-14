@@ -171,12 +171,15 @@
             }
             
             try {
-                const response = await fetch('/api/stories', {
+                const response = await fetch('/api', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify(storyData)
+                    body: JSON.stringify({
+                        action: 'stories',
+                        ...storyData
+                    })
                 });
                 
                 if (response.ok) {
@@ -206,7 +209,13 @@
         // Load stories on page load
         async function loadStories() {
             try {
-                const response = await fetch('/api/stories');
+                const response = await fetch('/api', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action: 'stories' })
+                });
                 if (response.ok) {
                     const stories = await response.json();
                     displayStories(stories);

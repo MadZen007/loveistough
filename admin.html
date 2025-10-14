@@ -535,7 +535,13 @@
         // Load admin data
         async function loadAdminData() {
             try {
-                const response = await fetch('/api/admin/stats');
+                const response = await fetch('/api', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action: 'admin/stats' })
+                });
                 if (response.ok) {
                     const stats = await response.json();
                     updateStats(stats);
@@ -545,7 +551,13 @@
             }
 
             try {
-                const response = await fetch('/api/admin/submissions');
+                const response = await fetch('/api', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ action: 'admin/submissions' })
+                });
                 if (response.ok) {
                     const submissions = await response.json();
                     allSubmissions = submissions;
@@ -601,14 +613,16 @@
 
         async function handleSubmission(submissionId, action) {
             try {
-                const response = await fetch('/api/admin/submissions', {
-                    method: 'PATCH',
+                const response = await fetch('/api', {
+                    method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                     },
                     body: JSON.stringify({
+                        action: 'admin/submissions',
+                        method: 'PATCH',
                         id: submissionId,
-                        action: action
+                        submissionAction: action
                     })
                 });
 
@@ -691,7 +705,17 @@
                 const params = new URLSearchParams({ period });
                 if (page !== 'all') params.append('page', page);
                 
-                const response = await fetch(`/api/admin/analytics?${params}`);
+                const response = await fetch('/api', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'admin/analytics',
+                        period,
+                        page: page !== 'all' ? page : undefined
+                    })
+                });
                 if (response.ok) {
                     const data = await response.json();
                     updateAnalyticsDisplay(data);
