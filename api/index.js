@@ -21,7 +21,8 @@ const {
 
 // CORS middleware
 const cors = require('cors');
-const { kv } = require('@vercel/kv');
+const { sql } = require('@vercel/postgres');
+const { setupDatabase } = require('./database-setup');
 // Lock CORS to allowed origins (env ALLOWED_ORIGINS or sane defaults)
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://www.loveistough.com,https://loveistough.com').split(',').map(s => s.trim());
 const corsMiddleware = cors({
@@ -158,124 +159,85 @@ async function parseJsonBody(req) {
     });
 }
 
-// Helper function to get stories from persistent storage
-async function getStoriesFromKV() {
+// Helper function to get stories from Postgres
+async function getStoriesFromDB() {
     try {
-        console.log('getStoriesFromKV called - kv available:', !!kv);
+        console.log('getStoriesFromDB called - fetching from Postgres...');
         
-        // Try KV first
-        if (kv) {
-            console.log('Attempting to get stories from KV...');
-            const stories = await kv.get('stories');
-            console.log('KV returned stories:', stories?.length || 0, stories);
-            return stories || [];
-        }
+        const result = await sql`
+            SELECT id, title, content, category, status, timestamp, reviewed_at
+            FROM stories 
+            ORDER BY timestamp DESC
+        `;
         
-        // Fallback to file-based storage in /tmp (persists across requests in Vercel)
-        console.log('KV not available, trying file-based storage...');
-        const fs = require('fs');
-        const path = require('path');
-        const storiesFile = path.join('/tmp', 'stories.json');
-        
-        if (fs.existsSync(storiesFile)) {
-            const fileContent = fs.readFileSync(storiesFile, 'utf8');
-            const stories = JSON.parse(fileContent);
-            console.log('File-based storage returned stories:', stories?.length || 0);
-            return stories || [];
-        }
-        
-        console.log('No file found, using in-memory storage. Global stories:', global.stories?.length || 0);
-        return global.stories || [];
+        console.log('Postgres returned stories:', result.rows?.length || 0);
+        return result.rows || [];
     } catch (error) {
-        console.log('Error loading stories from storage:', error.message);
-        console.log('Falling back to in-memory storage. Global stories:', global.stories?.length || 0);
-        return global.stories || [];
+        console.log('Error loading stories from Postgres:', error.message);
+        return [];
     }
 }
 
-// Helper function to save stories to persistent storage
-async function saveStoriesToKV(stories) {
+// Helper function to save a single story to Postgres
+async function saveStoryToDB(story) {
     try {
-        // Try KV first
-        if (kv) {
-            await kv.set('stories', stories);
-            console.log('Stories saved to KV:', stories.length);
-            return true;
-        }
+        console.log('saveStoryToDB called - saving to Postgres:', story.id);
         
-        // Fallback to file-based storage in /tmp (persists across requests in Vercel)
-        console.log('KV not available, saving to file-based storage...');
-        const fs = require('fs');
-        const path = require('path');
-        const storiesFile = path.join('/tmp', 'stories.json');
+        await sql`
+            INSERT INTO stories (id, title, content, category, status, timestamp, reviewed_at)
+            VALUES (${story.id}, ${story.title}, ${story.content}, ${story.category}, ${story.status}, ${story.timestamp}, ${story.reviewed_at || null})
+            ON CONFLICT (id) DO UPDATE SET
+                title = EXCLUDED.title,
+                content = EXCLUDED.content,
+                category = EXCLUDED.category,
+                status = EXCLUDED.status,
+                reviewed_at = EXCLUDED.reviewed_at
+        `;
         
-        fs.writeFileSync(storiesFile, JSON.stringify(stories, null, 2));
-        console.log('Stories saved to file:', stories.length);
-        
-        // Also store in memory as backup
-        global.stories = stories;
+        console.log('Story saved to Postgres:', story.id);
         return true;
     } catch (error) {
-        console.log('Error saving stories to storage:', error.message);
-        console.log('Storing in memory as fallback');
-        global.stories = stories;
-        return true; // Return true to continue operation
+        console.log('Error saving story to Postgres:', error.message);
+        return false;
     }
 }
 
-// Helper function to get analytics from persistent storage
-async function getAnalyticsFromKV() {
+// Helper function to get analytics from Postgres
+async function getAnalyticsFromDB() {
     try {
-        // Try KV first
-        if (kv) {
-            const analytics = await kv.get('analytics');
-            return analytics || [];
-        }
+        console.log('getAnalyticsFromDB called - fetching from Postgres...');
         
-        // Fallback to file-based storage
-        const fs = require('fs');
-        const path = require('path');
-        const analyticsFile = path.join('/tmp', 'analytics.json');
+        const result = await sql`
+            SELECT session_id, page, event_type, event_data, timestamp
+            FROM analytics 
+            ORDER BY timestamp DESC
+        `;
         
-        if (fs.existsSync(analyticsFile)) {
-            const fileContent = fs.readFileSync(analyticsFile, 'utf8');
-            const analytics = JSON.parse(fileContent);
-            return analytics || [];
-        }
-        
-        return global.analytics || [];
+        console.log('Postgres returned analytics:', result.rows?.length || 0);
+        return result.rows || [];
     } catch (error) {
-        console.log('Error loading analytics from storage:', error.message);
-        return global.analytics || [];
+        console.log('Error loading analytics from Postgres:', error.message);
+        return [];
     }
 }
 
-// Helper function to save analytics to persistent storage
-async function saveAnalyticsToKV(analytics) {
+// Helper function to save analytics to Postgres
+async function saveAnalyticsToDB(analytics) {
     try {
-        // Try KV first
-        if (kv) {
-            await kv.set('analytics', analytics);
-            console.log('Analytics saved to KV:', analytics.length);
-            return true;
+        console.log('saveAnalyticsToDB called - saving to Postgres:', analytics.length, 'events');
+        
+        for (const event of analytics) {
+            await sql`
+                INSERT INTO analytics (session_id, page, event_type, event_data, timestamp)
+                VALUES (${event.sessionId}, ${event.page}, ${event.eventType}, ${JSON.stringify(event.eventData || {})}, ${event.timestamp})
+            `;
         }
         
-        // Fallback to file-based storage
-        const fs = require('fs');
-        const path = require('path');
-        const analyticsFile = path.join('/tmp', 'analytics.json');
-        
-        fs.writeFileSync(analyticsFile, JSON.stringify(analytics, null, 2));
-        console.log('Analytics saved to file:', analytics.length);
-        
-        // Also store in memory as backup
-        global.analytics = analytics;
+        console.log('Analytics saved to Postgres:', analytics.length, 'events');
         return true;
     } catch (error) {
-        console.log('Error saving analytics to storage:', error.message);
-        console.log('Storing analytics in memory as fallback');
-        global.analytics = analytics;
-        return true; // Return true to continue operation
+        console.log('Error saving analytics to Postgres:', error.message);
+        return false;
     }
 }
 
@@ -303,11 +265,10 @@ module.exports = async (req, res) => {
         // Debug logging
         console.log('API Request:', { method, action, params, body, url: req.url, headers: req.headers });
         
-        // Only load stories for actions that need them
-        const storyActions = ['stories', 'get-stories', 'admin/stats', 'get-submissions', 'admin/submissions'];
-        if (storyActions.includes(action)) {
-            global.stories = await getStoriesFromKV();
-            console.log('Global stories at start of request:', global.stories.length);
+        // Initialize database schema on first request
+        if (!global.dbInitialized) {
+            await setupDatabase();
+            global.dbInitialized = true;
         }
 
         // Handle GET requests without action (browser requests, favicon, etc.)
@@ -968,25 +929,13 @@ async function handleSubmitStory(res, params) {
             timestamp: new Date().toISOString()
         };
         
-        // Store in memory and KV (for persistence in serverless environment)
-        if (!global.stories) global.stories = [];
-        global.stories.push(story);
-        console.log('Story added to global.stories. Total stories in memory:', global.stories.length);
-        
-        // Save to KV for persistence (with fallback to memory)
-        try {
-            console.log('Attempting to save stories to KV...');
-            const saved = await saveStoriesToKV(global.stories);
-            console.log('Save result:', saved);
-            if (!saved) {
-                console.log('Failed to save to storage, but continuing with in-memory storage');
-            }
-        } catch (storageError) {
-            console.log('Storage error, but continuing:', storageError.message);
+        // Save story to Postgres
+        const saved = await saveStoryToDB(story);
+        if (!saved) {
+            return sendErrorResponse(res, 500, 'Failed to save story to database');
         }
         
         console.log('Story stored successfully:', story);
-        console.log('Total stories in memory:', global.stories.length);
         
         sendSuccessResponse(res, { storyId: story.id }, 'Story submitted successfully. It will be reviewed before being published.');
     } catch (error) {
@@ -999,9 +948,9 @@ async function handleGetStories(res, params) {
     try {
         const { action, limit = 20, offset = 0 } = params;
         
-        // Load stories from KV (same as other functions)
-        const allStories = await getStoriesFromKV();
-        console.log('handleGetStories - all stories from KV:', allStories);
+        // Load stories from Postgres
+        const allStories = await getStoriesFromDB();
+        console.log('handleGetStories - all stories from Postgres:', allStories);
         
         const stories = allStories
             .filter(story => story.status === 'approved')
@@ -1018,10 +967,10 @@ async function handleGetStories(res, params) {
 // Admin stats handler
 async function handleAdminStats(res, params = {}) {
     try {
-        // Load stories from KV (same as submissions function)
-        const stories = await getStoriesFromKV();
+        // Load stories from Postgres
+        const stories = await getStoriesFromDB();
         
-        console.log('Admin stats - stories loaded from KV:', stories);
+        console.log('Admin stats - stories loaded from Postgres:', stories);
         console.log('Admin stats - stories length:', stories.length);
         console.log('Admin stats - stories statuses:', stories.map(s => ({ id: s.id, status: s.status, timestamp: s.timestamp })));
         
@@ -1051,10 +1000,10 @@ async function handleGetSubmissions(res, params) {
         console.log('handleGetSubmissions called with params:', params);
         const { action, status, category, limit = 50, offset = 0 } = params;
         
-        // Load stories directly from KV (same as stats function)
-        let stories = await getStoriesFromKV();
+        // Load stories directly from Postgres
+        let stories = await getStoriesFromDB();
         
-        console.log('Current stories loaded from KV:', stories);
+        console.log('Current stories loaded from Postgres:', stories);
         
         // Apply filters
         if (status && status !== 'all') {
@@ -1086,26 +1035,24 @@ async function handleUpdateSubmission(res, params) {
             return sendErrorResponse(res, 400, 'Valid id and action (approve/deny) are required');
         }
         
-        // Load stories directly from KV (same as other functions)
-        const stories = await getStoriesFromKV();
-        const storyIndex = stories.findIndex(s => s.id === id);
+        // Update story status in Postgres
+        const newStatus = actionToUse === 'approve' ? 'approved' : 'denied';
+        const reviewedAt = new Date().toISOString();
         
-        if (storyIndex === -1) {
+        const result = await sql`
+            UPDATE stories 
+            SET status = ${newStatus}, reviewed_at = ${reviewedAt}
+            WHERE id = ${id}
+            RETURNING *
+        `;
+        
+        if (result.rows.length === 0) {
             return sendErrorResponse(res, 404, 'Story not found');
         }
         
-        stories[storyIndex].status = actionToUse === 'approve' ? 'approved' : 'denied';
-        stories[storyIndex].reviewedAt = new Date().toISOString();
+        console.log('Story status updated in Postgres');
         
-        // Save changes back to KV
-        const saved = await saveStoriesToKV(stories);
-        if (!saved) {
-            return sendErrorResponse(res, 500, 'Failed to save story update to persistent storage');
-        }
-        
-        console.log('Story status updated in KV');
-        
-        sendSuccessResponse(res, { story: stories[storyIndex] }, `Story ${actionToUse}d successfully`);
+        sendSuccessResponse(res, { story: result.rows[0] }, `Story ${actionToUse}d successfully`);
     } catch (error) {
         sendErrorResponse(res, 500, 'Failed to update submission', error.message);
     }
@@ -1132,19 +1079,10 @@ async function handleAnalyticsTracking(res, params) {
             ip: res.req.headers['x-forwarded-for'] || res.req.connection.remoteAddress || 'unknown'
         };
 
-        // Load existing analytics from KV and add new entry
-        let analytics = await getAnalyticsFromKV();
-        analytics.push(analyticsData);
-
-        // Keep only last 10000 entries to prevent storage issues
-        if (analytics.length > 10000) {
-            analytics = analytics.slice(-8000);
-        }
-
-        // Save back to KV
-        const saved = await saveAnalyticsToKV(analytics);
+        // Save analytics to Postgres
+        const saved = await saveAnalyticsToDB([analyticsData]);
         if (!saved) {
-            console.log('Failed to save analytics to KV, but continuing...');
+            console.log('Failed to save analytics to Postgres, but continuing...');
         }
 
         sendSuccessResponse(res, { id: analyticsData.id }, 'Analytics tracked');
@@ -1186,9 +1124,9 @@ async function handleAdminAnalytics(res, params) {
     try {
         const { action, period = 'week', page, startDate, endDate } = params;
         
-        let analytics = await getAnalyticsFromKV();
+        let analytics = await getAnalyticsFromDB();
         
-        console.log('Admin analytics - loaded from KV:', analytics.length);
+        console.log('Admin analytics - loaded from Postgres:', analytics.length);
         
         let filteredAnalytics = [...analytics];
 
