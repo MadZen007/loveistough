@@ -337,6 +337,8 @@ module.exports = async (req, res) => {
             case 'admin/analytics':
                 if (method === 'GET') {
                     await handleAdminAnalytics(res, req.query);
+                } else if (method === 'POST') {
+                    await handleAdminAnalytics(res, params);
                 } else {
                     return sendErrorResponse(res, 405, 'Method not allowed');
                 }
@@ -1052,6 +1054,38 @@ async function handleAnalyticsTracking(res, params) {
             global.analytics = global.analytics.slice(-8000);
         }
 
+        // Also save to file for persistence
+        try {
+            const fs = require('fs');
+            const path = require('path');
+            const analyticsFile = path.join('/tmp', 'analytics.json');
+            
+            // Load existing analytics from file
+            let fileAnalytics = [];
+            try {
+                if (fs.existsSync(analyticsFile)) {
+                    const fileContent = fs.readFileSync(analyticsFile, 'utf8');
+                    fileAnalytics = JSON.parse(fileContent);
+                }
+            } catch (e) {
+                console.log('Could not read existing analytics file:', e.message);
+            }
+            
+            // Add new analytics
+            fileAnalytics.push(analyticsData);
+            
+            // Keep only last 10000 entries in file too
+            if (fileAnalytics.length > 10000) {
+                fileAnalytics = fileAnalytics.slice(-8000);
+            }
+            
+            // Save back to file
+            fs.writeFileSync(analyticsFile, JSON.stringify(fileAnalytics, null, 2));
+            console.log('Analytics saved to file:', analyticsFile);
+        } catch (fileError) {
+            console.log('Could not save analytics to file:', fileError.message);
+        }
+
         sendSuccessResponse(res, { id: analyticsData.id }, 'Analytics tracked');
     } catch (error) {
         sendErrorResponse(res, 500, 'Failed to track analytics', error.message);
@@ -1092,6 +1126,25 @@ async function handleAdminAnalytics(res, params) {
         const { action, period = 'week', page, startDate, endDate } = params;
         
         let analytics = global.analytics || [];
+        
+        // If no analytics in memory, try to load from file
+        if (analytics.length === 0) {
+            try {
+                const fs = require('fs');
+                const path = require('path');
+                const analyticsFile = path.join('/tmp', 'analytics.json');
+                
+                if (fs.existsSync(analyticsFile)) {
+                    const fileContent = fs.readFileSync(analyticsFile, 'utf8');
+                    analytics = JSON.parse(fileContent);
+                    global.analytics = analytics; // Update global for this request
+                    console.log('Loaded analytics from file:', analytics.length);
+                }
+            } catch (e) {
+                console.log('Could not load analytics from file:', e.message);
+            }
+        }
+        
         let filteredAnalytics = [...analytics];
 
         // Apply date filtering
