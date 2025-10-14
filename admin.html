@@ -256,15 +256,15 @@
         }
         
         .submission-status {
-            position: absolute;
-            top: 1rem;
-            right: 1rem;
+            position: static;
+            display: inline-block;
             padding: 0.5rem 1rem;
             border-radius: 20px;
             font-size: 0.8rem;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.5px;
+            margin-right: 1rem;
         }
         
         .status-pending {
@@ -352,6 +352,32 @@
             background: rgba(220, 53, 69, 0.1);
             color: #dc3545;
             border-color: #dc3545;
+        }
+
+        /* Read more button styling */
+        .read-more-btn {
+            background: var(--admin-accent);
+            color: white;
+            border: 2px solid var(--admin-accent);
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            font-family: 'Open Sans', sans-serif;
+            font-weight: 600;
+            font-size: 0.9rem;
+            margin-top: 1rem;
+            transition: all 0.2s ease;
+        }
+
+        .read-more-btn:hover {
+            background: #e55a2b;
+            border-color: #e55a2b;
+            transform: translateY(-1px);
+        }
+
+        .story-text {
+            line-height: 1.6;
+            white-space: pre-wrap;
         }
     </style>
 </head>
@@ -594,8 +620,6 @@
 
             submissionsList.innerHTML = submissions.map(submission => `
                 <div class="submission-item" data-id="${submission.id}">
-                    <div class="submission-status status-${submission.status}">${submission.status.toUpperCase()}</div>
-                    
                     <div class="submission-header">
                         <div class="submission-title">${submission.title}</div>
                         <div class="submission-meta">
@@ -604,11 +628,19 @@
                     </div>
                     
                     <div class="submission-content">
-                        ${submission.content.length > 500 ? submission.content.substring(0, 500) + '...' : submission.content}
+                        <div class="story-text" id="story-${submission.id}">
+                            ${submission.content.length > 500 ? submission.content.substring(0, 500) + '...' : submission.content}
+                        </div>
+                        ${submission.content.length > 500 ? `
+                            <button class="read-more-btn" onclick="toggleStory('${submission.id}', '${submission.content.replace(/'/g, "\\'")}')">
+                                Read Full Story
+                            </button>
+                        ` : ''}
                     </div>
                     
                     ${submission.status === 'pending' ? `
                         <div class="submission-actions">
+                            <div class="submission-status status-${submission.status}">${submission.status.toUpperCase()}</div>
                             <button class="btn-approve" onclick="handleSubmission('${submission.id}', 'approve')">Approve</button>
                             <button class="btn-deny" onclick="handleSubmission('${submission.id}', 'deny')">Deny</button>
                         </div>
@@ -784,6 +816,22 @@
         document.getElementById('analyticsPeriod').addEventListener('change', loadAnalytics);
         document.getElementById('analyticsPage').addEventListener('change', loadAnalytics);
         document.getElementById('refreshAnalyticsBtn').addEventListener('click', loadAnalytics);
+
+        // Toggle story content between truncated and full
+        function toggleStory(storyId, fullContent) {
+            const storyElement = document.getElementById(`story-${storyId}`);
+            const button = storyElement.nextElementSibling;
+            
+            if (storyElement.textContent.includes('...')) {
+                // Show full content
+                storyElement.textContent = fullContent;
+                button.textContent = 'Show Less';
+            } else {
+                // Show truncated content
+                storyElement.textContent = fullContent.length > 500 ? fullContent.substring(0, 500) + '...' : fullContent;
+                button.textContent = 'Read Full Story';
+            }
+        }
 
         // Load data when page loads
         document.addEventListener('DOMContentLoaded', () => {
