@@ -18,7 +18,6 @@
   "author": "LoveIsTough Team",
   "license": "MIT",
   "dependencies": {
-    "@vercel/kv": "^3.0.0",
     "@vercel/node": "^3.0.0",
     "@vercel/postgres": "^0.10.0",
     "bcryptjs": "^2.4.3",
