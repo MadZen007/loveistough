@@ -21,6 +21,7 @@ const {
 
 // CORS middleware
 const cors = require('cors');
+const { kv } = require('@vercel/kv');
 // Lock CORS to allowed origins (env ALLOWED_ORIGINS or sane defaults)
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://www.loveistough.com,https://loveistough.com').split(',').map(s => s.trim());
 const corsMiddleware = cors({
@@ -157,26 +158,49 @@ async function parseJsonBody(req) {
     });
 }
 
-// Helper function to ensure stories are loaded from file if needed
-async function ensureStoriesLoaded() {
-    if (!global.stories || global.stories.length === 0) {
-        try {
-            const fs = require('fs');
-            const path = require('path');
-            const storiesFile = path.join('/tmp', 'stories.json');
-            
-            if (fs.existsSync(storiesFile)) {
-                const fileContent = fs.readFileSync(storiesFile, 'utf8');
-                global.stories = JSON.parse(fileContent);
-                console.log('Loaded stories from file:', global.stories.length);
-            } else {
-                global.stories = [];
-                console.log('No stories file found, initializing empty array');
-            }
-        } catch (e) {
-            console.log('Could not load stories from file:', e.message);
-            global.stories = [];
-        }
+// Helper function to get stories from KV storage
+async function getStoriesFromKV() {
+    try {
+        const stories = await kv.get('stories');
+        return stories || [];
+    } catch (error) {
+        console.log('Error loading stories from KV:', error.message);
+        return [];
+    }
+}
+
+// Helper function to save stories to KV storage
+async function saveStoriesToKV(stories) {
+    try {
+        await kv.set('stories', stories);
+        console.log('Stories saved to KV:', stories.length);
+        return true;
+    } catch (error) {
+        console.log('Error saving stories to KV:', error.message);
+        return false;
+    }
+}
+
+// Helper function to get analytics from KV storage
+async function getAnalyticsFromKV() {
+    try {
+        const analytics = await kv.get('analytics');
+        return analytics || [];
+    } catch (error) {
+        console.log('Error loading analytics from KV:', error.message);
+        return [];
+    }
+}
+
+// Helper function to save analytics to KV storage
+async function saveAnalyticsToKV(analytics) {
+    try {
+        await kv.set('analytics', analytics);
+        console.log('Analytics saved to KV:', analytics.length);
+        return true;
+    } catch (error) {
+        console.log('Error saving analytics to KV:', error.message);
+        return false;
     }
 }
 
@@ -207,8 +231,8 @@ module.exports = async (req, res) => {
         // Only load stories for actions that need them
         const storyActions = ['stories', 'get-stories', 'admin/stats', 'get-submissions', 'admin/submissions'];
         if (storyActions.includes(action)) {
-            console.log('Global stories at start of request:', global.stories ? global.stories.length : 'undefined');
-            await ensureStoriesLoaded();
+            global.stories = await getStoriesFromKV();
+            console.log('Global stories at start of request:', global.stories.length);
         }
 
         // Handle GET requests without action (browser requests, favicon, etc.)
@@ -869,35 +893,14 @@ async function handleSubmitStory(res, params) {
             timestamp: new Date().toISOString()
         };
         
-        // Store in memory and file (for persistence in serverless environment)
+        // Store in memory and KV (for persistence in serverless environment)
         if (!global.stories) global.stories = [];
         global.stories.push(story);
         
-        // Also save to file for persistence
-        try {
-            const fs = require('fs');
-            const path = require('path');
-            const storiesFile = path.join('/tmp', 'stories.json');
-            
-            // Load existing stories from file
-            let fileStories = [];
-            try {
-                if (fs.existsSync(storiesFile)) {
-                    const fileContent = fs.readFileSync(storiesFile, 'utf8');
-                    fileStories = JSON.parse(fileContent);
-                }
-            } catch (e) {
-                console.log('Could not read existing stories file:', e.message);
-            }
-            
-            // Add new story
-            fileStories.push(story);
-            
-            // Save back to file
-            fs.writeFileSync(storiesFile, JSON.stringify(fileStories, null, 2));
-            console.log('Story saved to file:', storiesFile);
-        } catch (fileError) {
-            console.log('Could not save to file:', fileError.message);
+        // Save to KV for persistence
+        const saved = await saveStoriesToKV(global.stories);
+        if (!saved) {
+            return sendErrorResponse(res, 500, 'Failed to save story to persistent storage');
         }
         
         console.log('Story stored successfully:', story);
@@ -929,7 +932,6 @@ async function handleGetStories(res, params) {
 // Admin stats handler
 async function handleAdminStats(res, params = {}) {
     try {
-        await ensureStoriesLoaded();
         const stories = global.stories || [];
         
         console.log('Admin stats - stories in memory:', stories);
@@ -958,7 +960,6 @@ async function handleGetSubmissions(res, params) {
         console.log('handleGetSubmissions called with params:', params);
         const { action, status, category, limit = 50, offset = 0 } = params;
         
-        await ensureStoriesLoaded();
         let stories = global.stories || [];
         
         console.log('Current stories in memory:', stories);
@@ -1003,16 +1004,13 @@ async function handleUpdateSubmission(res, params) {
         stories[storyIndex].status = actionToUse === 'approve' ? 'approved' : 'denied';
         stories[storyIndex].reviewedAt = new Date().toISOString();
         
-        // Save changes back to file
-        try {
-            const fs = require('fs');
-            const path = require('path');
-            const storiesFile = path.join('/tmp', 'stories.json');
-            fs.writeFileSync(storiesFile, JSON.stringify(stories, null, 2));
-            console.log('Story status updated in file');
-        } catch (fileError) {
-            console.log('Could not save story update to file:', fileError.message);
+        // Save changes back to KV
+        const saved = await saveStoriesToKV(stories);
+        if (!saved) {
+            return sendErrorResponse(res, 500, 'Failed to save story update to persistent storage');
         }
+        
+        console.log('Story status updated in KV');
         
         sendSuccessResponse(res, { story: stories[storyIndex] }, `Story ${actionToUse}d successfully`);
     } catch (error) {
@@ -1041,44 +1039,19 @@ async function handleAnalyticsTracking(res, params) {
             ip: res.req.headers['x-forwarded-for'] || res.req.connection.remoteAddress || 'unknown'
         };
 
-        if (!global.analytics) global.analytics = [];
-        global.analytics.push(analyticsData);
+        // Load existing analytics from KV and add new entry
+        let analytics = await getAnalyticsFromKV();
+        analytics.push(analyticsData);
 
-        // Keep only last 10000 entries to prevent memory issues
-        if (global.analytics.length > 10000) {
-            global.analytics = global.analytics.slice(-8000);
+        // Keep only last 10000 entries to prevent storage issues
+        if (analytics.length > 10000) {
+            analytics = analytics.slice(-8000);
         }
 
-        // Also save to file for persistence
-        try {
-            const fs = require('fs');
-            const path = require('path');
-            const analyticsFile = path.join('/tmp', 'analytics.json');
-            
-            // Load existing analytics from file
-            let fileAnalytics = [];
-            try {
-                if (fs.existsSync(analyticsFile)) {
-                    const fileContent = fs.readFileSync(analyticsFile, 'utf8');
-                    fileAnalytics = JSON.parse(fileContent);
-                }
-            } catch (e) {
-                console.log('Could not read existing analytics file:', e.message);
-            }
-            
-            // Add new analytics
-            fileAnalytics.push(analyticsData);
-            
-            // Keep only last 10000 entries in file too
-            if (fileAnalytics.length > 10000) {
-                fileAnalytics = fileAnalytics.slice(-8000);
-            }
-            
-            // Save back to file
-            fs.writeFileSync(analyticsFile, JSON.stringify(fileAnalytics, null, 2));
-            console.log('Analytics saved to file:', analyticsFile);
-        } catch (fileError) {
-            console.log('Could not save analytics to file:', fileError.message);
+        // Save back to KV
+        const saved = await saveAnalyticsToKV(analytics);
+        if (!saved) {
+            console.log('Failed to save analytics to KV, but continuing...');
         }
 
         sendSuccessResponse(res, { id: analyticsData.id }, 'Analytics tracked');
@@ -1120,25 +1093,9 @@ async function handleAdminAnalytics(res, params) {
     try {
         const { action, period = 'week', page, startDate, endDate } = params;
         
-        let analytics = global.analytics || [];
+        let analytics = await getAnalyticsFromKV();
         
-        // If no analytics in memory, try to load from file
-        if (analytics.length === 0) {
-            try {
-                const fs = require('fs');
-                const path = require('path');
-                const analyticsFile = path.join('/tmp', 'analytics.json');
-                
-                if (fs.existsSync(analyticsFile)) {
-                    const fileContent = fs.readFileSync(analyticsFile, 'utf8');
-                    analytics = JSON.parse(fileContent);
-                    global.analytics = analytics; // Update global for this request
-                    console.log('Loaded analytics from file:', analytics.length);
-                }
-            } catch (e) {
-                console.log('Could not load analytics from file:', e.message);
-            }
-        }
+        console.log('Admin analytics - loaded from KV:', analytics.length);
         
         let filteredAnalytics = [...analytics];
 
