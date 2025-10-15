@@ -230,9 +230,20 @@ async function saveAnalyticsToDB(analytics) {
         const sql = getSql();
         
         for (const event of analytics) {
+            // Ensure all required fields have default values to prevent UNDEFINED_VALUE errors
+            const safeEvent = {
+                sessionId: event.sessionId || 'unknown',
+                page: event.page || 'unknown',
+                eventType: event.eventType || 'unknown',
+                eventData: event.eventData || {},
+                timestamp: event.timestamp || new Date().toISOString()
+            };
+            
+            console.log('Saving analytics event:', safeEvent);
+            
             await sql`
                 INSERT INTO analytics (session_id, page, event_type, event_data, timestamp)
-                VALUES (${event.sessionId}, ${event.page}, ${event.eventType}, ${JSON.stringify(event.eventData || {})}, ${event.timestamp})
+                VALUES (${safeEvent.sessionId}, ${safeEvent.page}, ${safeEvent.eventType}, ${JSON.stringify(safeEvent.eventData)}, ${safeEvent.timestamp})
             `;
         }
         
