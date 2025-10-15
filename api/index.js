@@ -592,6 +592,22 @@ module.exports = async (req, res) => {
                 sendSuccessResponse(res, { message: 'Persistence test completed - check logs' }, 'Data persistence test completed');
                 break;
 
+            case 'test-retrieval':
+                if (method !== 'POST') {
+                    return sendErrorResponse(res, 405, 'Method not allowed');
+                }
+                console.log('🔧 Testing data retrieval...');
+                const stories = await getStoriesFromDB();
+                const analytics = await getAnalyticsFromDB();
+                console.log('🔧 Retrieval test - stories count:', stories.length);
+                console.log('🔧 Retrieval test - analytics count:', analytics.length);
+                sendSuccessResponse(res, { 
+                    message: 'Retrieval test completed - check logs',
+                    storiesCount: stories.length,
+                    analyticsCount: analytics.length
+                }, 'Data retrieval test completed');
+                break;
+
             // Auth enhancements
             case 'request-password-reset':
                 if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
