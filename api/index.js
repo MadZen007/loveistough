@@ -208,12 +208,14 @@ async function saveStoryToDB(story) {
       try {
           console.log('🔧 Testing database connection...');
           const sql = getSql();
+          console.log('🔧 SQL connection object:', typeof sql);
           
           // Test basic connection
           const connectionTest = await sql`SELECT 1 as test`;
           console.log('🔧 Basic connection test:', connectionTest);
           
           // Test if tables exist
+          console.log('🔧 About to query information_schema...');
           const tablesTest = await sql`
               SELECT table_name 
               FROM information_schema.tables 
@@ -262,6 +264,7 @@ async function saveStoryToDB(story) {
       } catch (error) {
           console.log('🔧 Database connection test failed:', error.message);
           console.log('🔧 Error details:', error);
+          console.log('🔧 Error stack:', error.stack);
       }
   }
 
