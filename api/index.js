@@ -600,14 +600,29 @@ module.exports = async (req, res) => {
                 }
                 console.log('🔧 Testing data retrieval...');
                 try {
+                    // Test direct database query first
+                    const sql = getSql();
+                    console.log('🔧 Direct database query test...');
+                    
+                    // Test stories table directly
+                    const storiesResult = await sql`SELECT COUNT(*) as count FROM stories`;
+                    console.log('🔧 Direct stories count:', storiesResult);
+                    
+                    // Test analytics table directly  
+                    const analyticsResult = await sql`SELECT COUNT(*) as count FROM analytics`;
+                    console.log('🔧 Direct analytics count:', analyticsResult);
+                    
+                    // Test with our functions
                     const stories = await getStoriesFromDB();
                     const analytics = await getAnalyticsFromDB();
                     console.log('🔧 Retrieval test - stories count:', stories.length);
                     console.log('🔧 Retrieval test - analytics count:', analytics.length);
                     sendSuccessResponse(res, { 
-                        message: 'Retrieval test completed - check logs',
+                        message: 'Data retrieval test complete',
                         storiesCount: stories.length,
-                        analyticsCount: analytics.length
+                        analyticsCount: analytics.length,
+                        directStoriesCount: storiesResult[0]?.count || 0,
+                        directAnalyticsCount: analyticsResult[0]?.count || 0
                     }, 'Data retrieval test completed');
                 } catch (error) {
                     console.log('🔧 Retrieval test error:', error.message);
