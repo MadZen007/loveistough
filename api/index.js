@@ -421,7 +421,7 @@ module.exports = async (req, res) => {
         }
 
         // Route based on action parameter
-        console.log('🔧 SWITCH STATEMENT - action:', action);
+        console.log('🔧 SWITCH STATEMENT - action:', action, 'TIMESTAMP:', new Date().toISOString());
         switch (action) {
             case 'health':
                 if (method !== 'GET' && method !== 'POST') {
