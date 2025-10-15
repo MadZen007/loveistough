@@ -231,13 +231,13 @@ async function saveAnalyticsToDB(analytics) {
         
         for (const event of analytics) {
             // Ensure all required fields have default values to prevent UNDEFINED_VALUE errors
-            const safeEvent = {
-                sessionId: event.sessionId || 'unknown',
-                page: event.page || 'unknown',
-                eventType: event.eventType || 'unknown',
-                eventData: event.eventData || {},
-                timestamp: event.timestamp || new Date().toISOString()
-            };
+              const safeEvent = {
+                  sessionId: event.sessionId || 'unknown',
+                  page: event.page || 'unknown',
+                  eventType: event.eventType || event.type || 'unknown',
+                  eventData: event.eventData || {},
+                  timestamp: event.timestamp || new Date().toISOString()
+              };
             
             console.log('Saving analytics event:', safeEvent);
             
@@ -941,7 +941,7 @@ async function handleSubmitStory(res, params) {
         
         if (!content || content.trim().length < 10) {
             console.log('Validation failed - content too short:', content ? content.length : 0);
-            return sendErrorResponse(res, 400, 'Story content is required and must be at least 10 characters');
+            return sendErrorResponse(res, 400, `Story content is required and must be at least 10 characters. You provided ${content ? content.length : 0} characters.`);
         }
         
         // In a real implementation, you'd save to database
