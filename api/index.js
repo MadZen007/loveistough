@@ -21,11 +21,7 @@ const {
 
 // CORS middleware
 const cors = require('cors');
-const { setupDatabase } = require('./database-setup');
-const postgres = require('postgres');
-
-// Initialize postgres connection
-const sql = postgres(process.env.POSTGRES_DATABASE_URL);
+const { setupDatabase, getSql } = require('./database-setup');
 // Lock CORS to allowed origins (env ALLOWED_ORIGINS or sane defaults)
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://www.loveistough.com,https://loveistough.com').split(',').map(s => s.trim());
 const corsMiddleware = cors({
@@ -166,6 +162,7 @@ async function parseJsonBody(req) {
 async function getStoriesFromDB() {
     try {
         console.log('getStoriesFromDB called - fetching from Postgres...');
+        const sql = getSql();
         
         const result = await sql`
             SELECT id, title, content, category, status, timestamp, reviewed_at
@@ -185,6 +182,7 @@ async function getStoriesFromDB() {
 async function saveStoryToDB(story) {
     try {
         console.log('saveStoryToDB called - saving to Postgres:', story.id);
+        const sql = getSql();
         
         await sql`
             INSERT INTO stories (id, title, content, category, status, timestamp, reviewed_at)
@@ -209,6 +207,7 @@ async function saveStoryToDB(story) {
 async function getAnalyticsFromDB() {
     try {
         console.log('getAnalyticsFromDB called - fetching from Postgres...');
+        const sql = getSql();
         
         const result = await sql`
             SELECT session_id, page, event_type, event_data, timestamp
@@ -228,6 +227,7 @@ async function getAnalyticsFromDB() {
 async function saveAnalyticsToDB(analytics) {
     try {
         console.log('saveAnalyticsToDB called - saving to Postgres:', analytics.length, 'events');
+        const sql = getSql();
         
         for (const event of analytics) {
             await sql`
@@ -1041,6 +1041,7 @@ async function handleUpdateSubmission(res, params) {
         // Update story status in Postgres
         const newStatus = actionToUse === 'approve' ? 'approved' : 'denied';
         const reviewedAt = new Date().toISOString();
+        const sql = getSql();
         
         const result = await sql`
             UPDATE stories 

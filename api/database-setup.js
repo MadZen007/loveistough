@@ -1,12 +1,24 @@
 const postgres = require('postgres');
 
-// Initialize postgres connection
-const sql = postgres(process.env.POSTGRES_DATABASE_URL);
+// Initialize postgres connection globally
+let sql;
+
+function getSql() {
+    if (!sql) {
+        sql = postgres(process.env.POSTGRES_DATABASE_URL, {
+            max: 1, // Limit to 1 connection for serverless
+            idle_timeout: 20,
+            connect_timeout: 10,
+        });
+    }
+    return sql;
+}
 
 // Database schema setup
 async function setupDatabase() {
     try {
         console.log('Setting up database schema...');
+        const sql = getSql();
         
         // Create stories table
         await sql`
@@ -60,4 +72,4 @@ async function setupDatabase() {
     }
 }
 
-module.exports = { setupDatabase };
+module.exports = { setupDatabase, getSql };
