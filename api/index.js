@@ -203,25 +203,87 @@ async function saveStoryToDB(story) {
     }
 }
 
-// Helper function to get analytics from Postgres
-async function getAnalyticsFromDB() {
-    try {
-        console.log('getAnalyticsFromDB called - fetching from Postgres...');
-        const sql = getSql();
-        
-        const result = await sql`
-            SELECT session_id, page, event_type, event_data, timestamp
-            FROM analytics 
-            ORDER BY timestamp DESC
-        `;
-        
-        console.log('Postgres returned analytics:', result.rows?.length || 0);
-        return result.rows || [];
-    } catch (error) {
-        console.log('Error loading analytics from Postgres:', error.message);
-        return [];
-    }
-}
+  // Database connection test function
+  async function testDatabaseConnection() {
+      try {
+          console.log('🔧 Testing database connection...');
+          const sql = getSql();
+          
+          // Test basic connection
+          const connectionTest = await sql`SELECT 1 as test`;
+          console.log('🔧 Basic connection test:', connectionTest);
+          
+          // Test if tables exist
+          const tablesTest = await sql`
+              SELECT table_name 
+              FROM information_schema.tables 
+              WHERE table_schema = 'public'
+          `;
+          console.log('🔧 Existing tables:', tablesTest);
+          
+          // Test stories table specifically
+          try {
+              const storiesCount = await sql`SELECT COUNT(*) as count FROM stories`;
+              console.log('🔧 Stories table count:', storiesCount);
+          } catch (error) {
+              console.log('🔧 Stories table error:', error.message);
+          }
+          
+          // Test analytics table specifically
+          try {
+              const analyticsCount = await sql`SELECT COUNT(*) as count FROM analytics`;
+              console.log('🔧 Analytics table count:', analyticsCount);
+          } catch (error) {
+              console.log('🔧 Analytics table error:', error.message);
+          }
+          
+          // Test inserting a test record
+          try {
+              const testId = `test_${Date.now()}`;
+              await sql`
+                  INSERT INTO stories (id, title, content, category, status, timestamp)
+                  VALUES (${testId}, 'Test Story', 'Test content', 'test', 'pending', NOW())
+                  ON CONFLICT (id) DO NOTHING
+              `;
+              console.log('🔧 Test insert successful');
+              
+              // Try to retrieve it
+              const testRetrieve = await sql`SELECT * FROM stories WHERE id = ${testId}`;
+              console.log('🔧 Test retrieve:', testRetrieve);
+              
+              // Clean up test record
+              await sql`DELETE FROM stories WHERE id = ${testId}`;
+              console.log('🔧 Test cleanup successful');
+              
+          } catch (error) {
+              console.log('🔧 Test insert/retrieve error:', error.message);
+          }
+          
+      } catch (error) {
+          console.log('🔧 Database connection test failed:', error.message);
+          console.log('🔧 Error details:', error);
+      }
+  }
+
+  // Helper function to get analytics from Postgres
+  async function getAnalyticsFromDB() {
+      try {
+          console.log('getAnalyticsFromDB called - fetching from Postgres...');
+          const sql = getSql();
+          
+          const result = await sql`
+              SELECT session_id, page, event_type, event_data, timestamp
+              FROM analytics 
+              ORDER BY timestamp DESC
+          `;
+          
+          console.log('Postgres returned analytics:', result.rows?.length || 0);
+          return result.rows || [];
+      } catch (error) {
+          console.log('Error loading analytics from Postgres:', error.message);
+          return [];
+      }
+  }
 
 // Helper function to save analytics to Postgres
 async function saveAnalyticsToDB(analytics) {
@@ -290,7 +352,13 @@ module.exports = async (req, res) => {
         
         // Initialize database schema on first request
         if (!global.dbInitialized) {
-            await setupDatabase();
+            console.log('🔧 Starting database initialization...');
+            const dbResult = await setupDatabase();
+            console.log('🔧 Database initialization result:', dbResult);
+            
+            // Test database connection
+            await testDatabaseConnection();
+            
             global.dbInitialized = true;
         }
 
@@ -454,6 +522,14 @@ module.exports = async (req, res) => {
                 } else {
                     return sendErrorResponse(res, 405, 'Method not allowed');
                 }
+                break;
+
+            case 'test-database':
+                if (method !== 'POST') {
+                    return sendErrorResponse(res, 405, 'Method not allowed');
+                }
+                await testDatabaseConnection();
+                sendSuccessResponse(res, { message: 'Database test completed - check logs' }, 'Database diagnostics completed');
                 break;
 
             // Auth enhancements
