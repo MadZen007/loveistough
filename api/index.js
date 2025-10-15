@@ -268,6 +268,39 @@ async function saveStoryToDB(story) {
       }
   }
 
+  // Test data persistence across requests
+  async function testDataPersistence() {
+      try {
+          console.log('🔧 Testing data persistence...');
+          const sql = getSql();
+          
+          // Insert a test record
+          const testId = `persistence_test_${Date.now()}`;
+          await sql`
+              INSERT INTO stories (id, title, content, category, status, timestamp)
+              VALUES (${testId}, 'Persistence Test', 'Testing data persistence', 'test', 'pending', NOW())
+              ON CONFLICT (id) DO NOTHING
+          `;
+          console.log('🔧 Test record inserted:', testId);
+          
+          // Try to retrieve it immediately
+          const result = await sql`SELECT * FROM stories WHERE id = ${testId}`;
+          console.log('🔧 Immediate retrieval result:', result);
+          
+          // Wait a moment and try again
+          await new Promise(resolve => setTimeout(resolve, 1000));
+          const result2 = await sql`SELECT * FROM stories WHERE id = ${testId}`;
+          console.log('🔧 Delayed retrieval result:', result2);
+          
+          // Clean up
+          await sql`DELETE FROM stories WHERE id = ${testId}`;
+          console.log('🔧 Test record cleaned up');
+          
+      } catch (error) {
+          console.log('🔧 Persistence test failed:', error.message);
+      }
+  }
+
   // Helper function to get analytics from Postgres
   async function getAnalyticsFromDB() {
       try {
@@ -533,6 +566,14 @@ module.exports = async (req, res) => {
                 }
                 await testDatabaseConnection();
                 sendSuccessResponse(res, { message: 'Database test completed - check logs' }, 'Database diagnostics completed');
+                break;
+
+            case 'test-persistence':
+                if (method !== 'POST') {
+                    return sendErrorResponse(res, 405, 'Method not allowed');
+                }
+                await testDataPersistence();
+                sendSuccessResponse(res, { message: 'Persistence test completed - check logs' }, 'Data persistence test completed');
                 break;
 
             // Auth enhancements

@@ -5,11 +5,17 @@ let sql;
 
 function getSql() {
     if (!sql) {
+        console.log('🔧 Creating new Postgres connection...');
+        console.log('🔧 Database URL exists:', !!process.env.POSTGRES_DATABASE_URL);
         sql = postgres(process.env.POSTGRES_DATABASE_URL, {
             max: 1, // Limit to 1 connection for serverless
             idle_timeout: 20,
             connect_timeout: 10,
+            transform: {
+                undefined: null
+            }
         });
+        console.log('🔧 Postgres connection created');
     }
     return sql;
 }
