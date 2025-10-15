@@ -1,4 +1,7 @@
-const { sql } = require('@vercel/postgres');
+const postgres = require('postgres');
+
+// Initialize postgres connection
+const sql = postgres(process.env.POSTGRES_DATABASE_URL);
 
 // Database schema setup
 async function setupDatabase() {

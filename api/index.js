@@ -21,7 +21,6 @@ const {
 
 // CORS middleware
 const cors = require('cors');
-const { sql } = require('@vercel/postgres');
 const { setupDatabase } = require('./database-setup');
 // Lock CORS to allowed origins (env ALLOWED_ORIGINS or sane defaults)
 const allowedOrigins = (process.env.ALLOWED_ORIGINS || 'https://www.loveistough.com,https://loveistough.com').split(',').map(s => s.trim());
