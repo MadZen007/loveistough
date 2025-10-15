@@ -421,6 +421,7 @@ module.exports = async (req, res) => {
         }
 
         // Route based on action parameter
+        console.log('🔧 SWITCH STATEMENT - action:', action);
         switch (action) {
             case 'health':
                 if (method !== 'GET' && method !== 'POST') {
@@ -620,6 +621,7 @@ module.exports = async (req, res) => {
                 if (!rateLimit(req, 'request-password-reset', 5)) return sendErrorResponse(res, 429, 'Too many requests');
                 await handleRequestPasswordReset(req, res, params);
                 break;
+
             case 'reset-password':
                 if (method !== 'POST') return sendErrorResponse(res, 405, 'Method not allowed');
                 await handleResetPassword(res, params);
