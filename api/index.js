@@ -594,39 +594,43 @@ module.exports = async (req, res) => {
                 break;
 
             case 'test-retrieval':
-                console.log('🔧 TEST-RETRIEVAL CASE REACHED!');
+                console.log('🔧🔧🔧 TEST-RETRIEVAL CASE REACHED! FORCE DEPLOYMENT TEST!');
                 if (method !== 'POST') {
                     return sendErrorResponse(res, 405, 'Method not allowed');
                 }
-                console.log('🔧 Testing data retrieval...');
+                console.log('🔧🔧🔧 Testing data retrieval... FORCE DEPLOYMENT TEST!');
                 try {
                     // Test direct database query first
                     const sql = getSql();
-                    console.log('🔧 Direct database query test...');
+                    console.log('🔧🔧🔧 SQL object in test-retrieval:', !!sql, 'FORCE DEPLOYMENT TEST!');
+                    console.log('🔧🔧🔧 Direct database query test... FORCE DEPLOYMENT TEST!');
                     
                     // Test stories table directly
+                    console.log('🔧🔧🔧 Before stories count direct query FORCE DEPLOYMENT TEST!');
                     const storiesResult = await sql`SELECT COUNT(*) as count FROM stories`;
-                    console.log('🔧 Direct stories count:', storiesResult);
+                    console.log('🔧🔧🔧 Direct stories count:', storiesResult, 'FORCE DEPLOYMENT TEST!');
                     
                     // Test analytics table directly  
+                    console.log('🔧🔧🔧 Before analytics count direct query FORCE DEPLOYMENT TEST!');
                     const analyticsResult = await sql`SELECT COUNT(*) as count FROM analytics`;
-                    console.log('🔧 Direct analytics count:', analyticsResult);
+                    console.log('🔧🔧🔧 Direct analytics count:', analyticsResult, 'FORCE DEPLOYMENT TEST!');
                     
                     // Test with our functions
                     const stories = await getStoriesFromDB();
                     const analytics = await getAnalyticsFromDB();
-                    console.log('🔧 Retrieval test - stories count:', stories.length);
-                    console.log('🔧 Retrieval test - analytics count:', analytics.length);
+                    console.log('🔧🔧🔧 Retrieval test - stories count:', stories.length, 'FORCE DEPLOYMENT TEST!');
+                    console.log('🔧🔧🔧 Retrieval test - analytics count:', analytics.length, 'FORCE DEPLOYMENT TEST!');
                     sendSuccessResponse(res, { 
-                        message: 'Data retrieval test complete',
+                        message: 'Data retrieval test complete - FORCE DEPLOYMENT TEST!',
                         storiesCount: stories.length,
                         analyticsCount: analytics.length,
                         directStoriesCount: storiesResult[0]?.count || 0,
-                        directAnalyticsCount: analyticsResult[0]?.count || 0
-                    }, 'Data retrieval test completed');
+                        directAnalyticsCount: analyticsResult[0]?.count || 0,
+                        forceDeploymentTest: true
+                    }, 'Data retrieval test completed - FORCE DEPLOYMENT TEST!');
                 } catch (error) {
-                    console.log('🔧 Retrieval test error:', error.message);
-                    sendErrorResponse(res, 500, 'Retrieval test failed', error.message);
+                    console.log('🔧🔧🔧 Retrieval test error:', error.message, 'FORCE DEPLOYMENT TEST!');
+                    sendErrorResponse(res, 500, 'Retrieval test failed - FORCE DEPLOYMENT TEST!', error.message);
                 }
                 break;
 
