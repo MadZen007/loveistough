@@ -593,19 +593,25 @@ module.exports = async (req, res) => {
                 break;
 
             case 'test-retrieval':
+                console.log('🔧 TEST-RETRIEVAL CASE REACHED!');
                 if (method !== 'POST') {
                     return sendErrorResponse(res, 405, 'Method not allowed');
                 }
                 console.log('🔧 Testing data retrieval...');
-                const stories = await getStoriesFromDB();
-                const analytics = await getAnalyticsFromDB();
-                console.log('🔧 Retrieval test - stories count:', stories.length);
-                console.log('🔧 Retrieval test - analytics count:', analytics.length);
-                sendSuccessResponse(res, { 
-                    message: 'Retrieval test completed - check logs',
-                    storiesCount: stories.length,
-                    analyticsCount: analytics.length
-                }, 'Data retrieval test completed');
+                try {
+                    const stories = await getStoriesFromDB();
+                    const analytics = await getAnalyticsFromDB();
+                    console.log('🔧 Retrieval test - stories count:', stories.length);
+                    console.log('🔧 Retrieval test - analytics count:', analytics.length);
+                    sendSuccessResponse(res, { 
+                        message: 'Retrieval test completed - check logs',
+                        storiesCount: stories.length,
+                        analyticsCount: analytics.length
+                    }, 'Data retrieval test completed');
+                } catch (error) {
+                    console.log('🔧 Retrieval test error:', error.message);
+                    sendErrorResponse(res, 500, 'Retrieval test failed', error.message);
+                }
                 break;
 
             // Auth enhancements
