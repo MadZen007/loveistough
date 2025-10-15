@@ -158,25 +158,33 @@ async function parseJsonBody(req) {
     });
 }
 
-// Helper function to get stories from Postgres
-async function getStoriesFromDB() {
-    try {
-        console.log('getStoriesFromDB called - fetching from Postgres...');
-        const sql = getSql();
-        
-        const result = await sql`
-            SELECT id, title, content, category, status, timestamp, reviewed_at
-            FROM stories 
-            ORDER BY timestamp DESC
-        `;
-        
-        console.log('Postgres returned stories:', result.rows?.length || 0);
-        return result.rows || [];
-    } catch (error) {
-        console.log('Error loading stories from Postgres:', error.message);
-        return [];
-    }
-}
+  // Helper function to get stories from Postgres
+  async function getStoriesFromDB() {
+      try {
+          console.log('getStoriesFromDB called - fetching from Postgres...');
+          const sql = getSql();
+          
+          // First, let's check if the table exists and has any data at all
+          const tableCheck = await sql`
+              SELECT COUNT(*) as total_count FROM stories
+          `;
+          console.log('🔧 Stories table total count:', tableCheck);
+          
+          const result = await sql`
+              SELECT id, title, content, category, status, timestamp, reviewed_at
+              FROM stories 
+              ORDER BY timestamp DESC
+          `;
+          
+          console.log('Postgres returned stories:', result.rows?.length || 0);
+          console.log('🔧 Stories query result:', result);
+          return result.rows || [];
+      } catch (error) {
+          console.log('Error loading stories from Postgres:', error.message);
+          console.log('🔧 Stories query error details:', error);
+          return [];
+      }
+  }
 
 // Helper function to save a single story to Postgres
 async function saveStoryToDB(story) {
@@ -307,6 +315,12 @@ async function saveStoryToDB(story) {
           console.log('getAnalyticsFromDB called - fetching from Postgres...');
           const sql = getSql();
           
+          // First, let's check if the table exists and has any data at all
+          const tableCheck = await sql`
+              SELECT COUNT(*) as total_count FROM analytics
+          `;
+          console.log('🔧 Analytics table total count:', tableCheck);
+          
           const result = await sql`
               SELECT session_id, page, event_type, event_data, timestamp
               FROM analytics 
@@ -314,9 +328,11 @@ async function saveStoryToDB(story) {
           `;
           
           console.log('Postgres returned analytics:', result.rows?.length || 0);
+          console.log('🔧 Analytics query result:', result);
           return result.rows || [];
       } catch (error) {
           console.log('Error loading analytics from Postgres:', error.message);
+          console.log('🔧 Analytics query error details:', error);
           return [];
       }
   }
