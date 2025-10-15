@@ -270,14 +270,23 @@ module.exports = async (req, res) => {
         return;
     }
 
-    try {
-        // Ensure body is parsed in dev and prod
-        const body = req.body && Object.keys(req.body).length ? req.body : await parseJsonBody(req);
-        const { action, ...params } = body || {};
-        const { method } = req;
+      try {
+          // Ensure body is parsed in dev and prod
+          let body = {};
+          if (req.body && Object.keys(req.body).length > 0) {
+              body = req.body;
+          } else {
+              body = await parseJsonBody(req);
+          }
+          
+          const { action, ...params } = body || {};
+          const { method } = req;
 
         // Debug logging
         console.log('API Request:', { method, action, params, body, url: req.url, headers: req.headers });
+        console.log('Body keys:', Object.keys(body || {}));
+        console.log('Action extracted:', action);
+        console.log('Params extracted:', params);
         
         // Initialize database schema on first request
         if (!global.dbInitialized) {
@@ -926,9 +935,12 @@ async function handleSubscriptionPlans(res) {
 // Story submission handler
 async function handleSubmitStory(res, params) {
     try {
+        console.log('handleSubmitStory called with params:', params);
         const { action, title, content, category } = params;
+        console.log('Extracted fields:', { action, title, content: content ? content.substring(0, 50) + '...' : 'null', category });
         
         if (!content || content.trim().length < 10) {
+            console.log('Validation failed - content too short:', content ? content.length : 0);
             return sendErrorResponse(res, 400, 'Story content is required and must be at least 10 characters');
         }
         
