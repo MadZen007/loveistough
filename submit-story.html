@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Share Your Story - Love Is Tough</title>
+    <link rel="icon" type="image/x-icon" href="images/favicon.ico">
+    <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@300;400;600;700&family=Playfair+Display:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-bg: #F5F5DC;
+            --color-primary: #4A5C6E;
+            --color-accent: #FF0000;
+            --color-text: #2C3E50;
+            --color-card-bg: #FFFFFF;
+            --color-border: #E0E0E0;
+            --font-heading: 'Playfair Display', serif;
+            --font-body: 'Open Sans', sans-serif;
+            --border-radius: 8px;
+            --shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-text);
+            line-height: 1.6;
+        }
+
+        /* Header */
+        .header {
+            background: var(--color-card-bg);
+            border-bottom: 1px solid var(--color-border);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: var(--shadow);
+        }
+
+        .header-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: var(--font-heading);
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--color-primary);
+            text-decoration: none;
+        }
+
+        .back-btn {
+            background: var(--color-primary);
+            color: white;
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-family: var(--font-body);
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .back-btn:hover {
+            background: #5a6b7d;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(112, 128, 144, 0.3);
+        }
+
+        /* Main Content */
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem 1rem;
+        }
+
+        .page-title {
+            font-family: var(--font-heading);
+            font-size: 2.5rem;
+            color: var(--color-primary);
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+
+        .page-subtitle {
+            text-align: center;
+            font-size: 1.1rem;
+            color: var(--color-text);
+            margin-bottom: 3rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Form */
+        .form-container {
+            background: var(--color-card-bg);
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: var(--color-text);
+            font-weight: 600;
+        }
+
+        .form-input,
+        .form-textarea,
+        .form-select {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid var(--color-border);
+            border-radius: var(--border-radius);
+            font-family: var(--font-body);
+            background: var(--color-bg);
+            color: var(--color-text);
+            transition: border-color 0.3s ease;
+        }
+
+        .form-input:focus,
+        .form-textarea:focus,
+        .form-select:focus {
+            outline: none;
+            border-color: var(--color-accent);
+        }
+
+        .form-textarea {
+            resize: vertical;
+            min-height: 150px;
+        }
+
+        .submit-btn {
+            background: var(--color-accent);
+            color: white;
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: var(--border-radius);
+            font-family: var(--font-body);
+            font-weight: 600;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            width: 100%;
+        }
+
+        .submit-btn:hover {
+            background: #cc0000;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(255, 0, 0, 0.3);
+        }
+
+        .submit-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        /* Privacy Note */
+        .privacy-note {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-left: 4px solid var(--color-accent);
+            border-radius: var(--border-radius);
+            padding: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .privacy-note h4 {
+            color: var(--color-primary);
+            margin-bottom: 0.5rem;
+        }
+
+        .privacy-note p {
+            color: var(--color-text);
+            font-size: 0.9rem;
+        }
+
+        /* Messages */
+        .message {
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            margin-bottom: 1rem;
+            font-weight: 600;
+        }
+
+        .message.success {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .message.error {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-container {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .page-title {
+                font-size: 2rem;
+            }
+
+            .form-container {
+                padding: 1.5rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .page-title {
+                font-size: 1.8rem;
+            }
+
+            .form-container {
+                padding: 1rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-container">
+            <a href="index.html" class="logo">Love Is Tough</a>
+            <a href="stories.html" class="back-btn">← Back to Stories</a>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main>
+        <div class="container">
+            <h1 class="page-title">Share Your Story</h1>
+            <p class="page-subtitle">
+                Your story matters. Share your experience to help others who might be going through something similar.
+            </p>
+
+            <!-- Form -->
+            <div class="form-container">
+                <div class="privacy-note">
+                    <h4>🔒 Your Privacy is Protected</h4>
+                    <p>Your submission will be completely anonymous. We will review all stories before publishing them to ensure they're appropriate and helpful to our community.</p>
+                </div>
+
+                <div id="messageContainer"></div>
+
+                <form id="storyForm">
+                    <div class="form-group">
+                        <label for="storyTitle" class="form-label">Story Title (Optional)</label>
+                        <input type="text" id="storyTitle" name="title" class="form-input" placeholder="Give your story a title...">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="storyContent" class="form-label">Your Story *</label>
+                        <textarea id="storyContent" name="content" class="form-textarea" placeholder="Tell us your story... What happened? How did it make you feel? What did you learn? Remember, this will be anonymous." required></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="storyCategory" class="form-label">Category (Optional)</label>
+                        <select id="storyCategory" name="category" class="form-select">
+                            <option value="">Choose a category...</option>
+                            <option value="heartbreak">Heartbreak</option>
+                            <option value="healing">Healing & Growth</option>
+                            <option value="dating">Dating</option>
+                            <option value="relationships">Relationships</option>
+                            <option value="family">Family</option>
+                            <option value="friendship">Friendship</option>
+                            <option value="self-love">Self-Love</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    
+                    <button type="submit" class="submit-btn" id="submitBtn">Share My Story</button>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <script src="analytics.js"></script>
+    <script>
+        // Handle story submission
+        document.getElementById('storyForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const messageContainer = document.getElementById('messageContainer');
+            
+            // Disable submit button
+            submitBtn.disabled = true;
+            submitBtn.textContent = 'Sharing Your Story...';
+            
+            const formData = new FormData(this);
+            const storyData = {
+                title: formData.get('title') || 'Untitled Story',
+                content: formData.get('content'),
+                category: formData.get('category') || 'other',
+                timestamp: new Date().toISOString()
+            };
+            
+            if (!storyData.content.trim()) {
+                showMessage('Please write your story before submitting.', 'error');
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Share My Story';
+                return;
+            }
+            
+            try {
+                const response = await fetch('/api', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        action: 'submit-story',
+                        ...storyData
+                    })
+                });
+                
+                if (response.ok) {
+                    showMessage('Thank you for sharing your story! It will be reviewed and may appear on our stories page soon.', 'success');
+                    this.reset();
+                    
+                    // Track analytics
+                    if (window.analytics) {
+                        window.analytics.trackEvent('story_submitted', {
+                            formLocation: 'submit_story_page'
+                        });
+                    }
+                } else {
+                    const result = await response.json();
+                    showMessage(result.message || 'There was an error submitting your story. Please try again.', 'error');
+                }
+            } catch (error) {
+                console.error('Error submitting story:', error);
+                showMessage('There was an error submitting your story. Please check your connection and try again.', 'error');
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.textContent = 'Share My Story';
+            }
+        });
+        
+        function showMessage(message, type) {
+            const messageContainer = document.getElementById('messageContainer');
+            messageContainer.innerHTML = `
+                <div class="message ${type}">
+                    ${message}
+                </div>
+            `;
+            
+            // Scroll to message
+            messageContainer.scrollIntoView({ behavior: 'smooth' });
+        }
+    </script>
+</body>
+</html>

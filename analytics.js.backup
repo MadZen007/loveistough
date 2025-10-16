@@ -89,6 +89,13 @@ class AnalyticsTracker {
                     location: 'meme_button'
                 });
             }
+
+            // Track story submissions
+            if (target.closest('#storyForm')) {
+                this.trackEvent('story_form_interaction', {
+                    formAction: 'form_start'
+                });
+            }
         });
     }
 
@@ -140,4 +147,18 @@ class AnalyticsTracker {
 // Initialize analytics when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.analytics = new AnalyticsTracker();
+});
+
+// Track story form submission
+document.addEventListener('DOMContentLoaded', () => {
+    const storyForm = document.getElementById('storyForm');
+    if (storyForm) {
+        storyForm.addEventListener('submit', () => {
+            if (window.analytics) {
+                window.analytics.trackEvent('story_submitted', {
+                    formLocation: 'stories_page'
+                });
+            }
+        });
+    }
 });
