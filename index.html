@@ -204,7 +204,9 @@
         // Load and display random thoughts
         async function loadRandomThoughts() {
             try {
-                const response = await fetch('/api', {
+                const apiUrl = window.location.origin + '/api';
+                console.log('Loading random thoughts from:', apiUrl);
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -214,11 +216,15 @@
                     })
                 });
 
+                console.log('Random thoughts response status:', response.status, response.statusText);
+                
                 if (response.ok) {
                     const result = await response.json();
                     const thoughts = (result.data || []).filter(trait => trait.status === 'approved');
                     displayRandomThoughts(thoughts);
                 } else {
+                    const errorText = await response.text();
+                    console.error('Random thoughts API error:', response.status, errorText);
                     showRandomThoughtsError('Failed to load random thoughts. Please try again later.');
                 }
             } catch (error) {
@@ -285,7 +291,9 @@
         // Load and display stories
         async function loadStories() {
             try {
-                const response = await fetch('/api', {
+                const apiUrl = window.location.origin + '/api';
+                console.log('Loading stories from:', apiUrl);
+                const response = await fetch(apiUrl, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
@@ -295,11 +303,15 @@
                     })
                 });
 
+                console.log('Stories response status:', response.status, response.statusText);
+                
                 if (response.ok) {
                     const result = await response.json();
                     const stories = result.data || [];
                     displayStories(stories);
                 } else {
+                    const errorText = await response.text();
+                    console.error('Stories API error:', response.status, errorText);
                     showStoriesError('Failed to load stories. Please try again later.');
                 }
             } catch (error) {
