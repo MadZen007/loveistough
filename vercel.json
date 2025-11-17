@@ -34,7 +34,19 @@
       "use": "@vercel/static"
     },
     {
+      "src": "submit-story.html",
+      "use": "@vercel/static"
+    },
+    {
       "src": "admin.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "other-side.html",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "submit-trait.html",
       "use": "@vercel/static"
     },
     {
@@ -56,6 +68,16 @@
     {
       "src": "images/**/*",
       "use": "@vercel/static"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api",
+      "dest": "/api/index.js"
+    },
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/index.js"
     }
   ]
 } 
